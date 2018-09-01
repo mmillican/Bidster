@@ -1,0 +1,26 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Bidster.Entities.Users;
+
+namespace Bidster.Entities.Events
+{
+    public class Event 
+    {
+        public int Id { get; set; }
+
+        [Required, MaxLength(100)]
+        public string Slug { get; set; }
+        [Required, MaxLength(100)]
+        public string Name { get; set; }
+
+        public DateTime StartOn { get; set; }
+        public DateTime EndOn { get; set; }
+
+        public int OwnerId { get; set; }
+        [ForeignKey(nameof(OwnerId))]
+        public virtual User Owner { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+    }
+}
