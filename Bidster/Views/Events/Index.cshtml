@@ -1,0 +1,31 @@
+@model Bidster.Models.Events.EventListViewModel
+
+@{
+    ViewBag.Title = "Events";
+}
+
+<h1>Events</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">New Event</a>
+</p>
+
+<table class="table table-condensed table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Start</th>
+            <th>End</th>
+        </tr>
+    </thead>
+    @foreach (var evt in Model.Events)
+    {
+        <tr>
+            <td>
+                <a asp-action="Details" asp-route-slug="@evt.Slug">@evt.Name</a>
+            </td>
+            <td>@evt.StartOn.ToString("d")</td>
+            <td>@evt.EndOn.ToString("d")</td>
+        </tr>
+    }
+</table>

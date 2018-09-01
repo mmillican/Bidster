@@ -1,0 +1,15 @@
+@model Bidster.Models.Events.EventDetailsViewModel
+@inject SignInManager<User> SignInManager
+
+@{
+    ViewBag.Title = Model.Event.Name;
+}
+
+<h1>@Model.Event.Name</h1>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <p>
+        <a asp-action="Edit" asp-route-id="@Model.Event.Id" class="btn btn-default">Edit</a>
+    </p>
+}
