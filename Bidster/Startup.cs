@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Bidster.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Bidster.Entities.Users;
 
 namespace Bidster
 {
@@ -34,11 +35,12 @@ namespace Bidster
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<BidsterDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                    
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<BidsterDbContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
