@@ -13,6 +13,8 @@ using Bidster.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Bidster.Entities.Users;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Bidster.Services;
 
 namespace Bidster
 {
@@ -40,9 +42,12 @@ namespace Bidster
                     Configuration.GetConnectionString("DefaultConnection")));
                     
             services.AddIdentity<User, Role>()
-                .AddEntityFrameworkStores<BidsterDbContext>();
+                .AddEntityFrameworkStores<BidsterDbContext>()
+                .AddDefaultTokenProviders();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            
+            services.AddSingleton<IEmailSender, EmailSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
