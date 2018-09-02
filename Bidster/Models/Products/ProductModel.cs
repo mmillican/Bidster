@@ -21,5 +21,8 @@ namespace Bidster.Models.Products
         public int? CurrentHighBidUserId { get; set; }
 
         public int BidCount { get; set; }
+        public bool HasBids => BidCount > 0;
+
+        public decimal NextMinBidAmount { get; set; }
     }
 }

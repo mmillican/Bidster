@@ -1,5 +1,7 @@
+using Bidster.Entities.Bids;
 using Bidster.Entities.Events;
 using Bidster.Entities.Products;
+using Bidster.Models.Bids;
 using Bidster.Models.Events;
 using Bidster.Models.Products;
 
@@ -18,7 +20,7 @@ namespace Bidster.Models
             CreatedOn = evt.CreatedOn
         };
 
-        public static ProductModel ToProductModel(Product product) => new ProductModel
+        public static ProductModel ToProductModel(this Product product) => new ProductModel
         {
             Id = product.Id,
             EventId = product.EventId,
@@ -29,7 +31,18 @@ namespace Bidster.Models
             MinimumBidAmount = product.MinimumBidAmount,
             CurrentBidAmount = product.CurrentBidAmount,
             CurrentHighBidUserId = product.CurrentHighBidUserId,
-            BidCount = product.BidCount
+            BidCount = product.BidCount,
+            NextMinBidAmount = product.NextMinBidAmount
+        };
+
+        public static BidModel ToBidModel(this Bid bid) => new BidModel
+        {
+            Id = bid.Id,
+            ProductId = bid.ProductId,
+            UserId = bid.User.Id,
+            UserName = bid.User.FullName,
+            Timestamp = bid.Timestamp,
+            Amount = bid.Amount
         };
     }
 }

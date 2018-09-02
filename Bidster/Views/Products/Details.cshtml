@@ -1,0 +1,55 @@
+@model Bidster.Models.Products.ProductDetailsViewModel
+@{
+    ViewBag.PreHeading = Model.Event.Name;
+    ViewBag.Title = $"{Model.Product.Name} - {Model.Event.Name}";
+}
+
+<p class="description">
+    @Model.Product.Description
+</p>
+
+<h3>Bid Now</h3>
+<div class="row">
+    <div class="col-md-6">
+        <div class="alert alert-info">
+            Bid must be <strong>@Model.Product.NextMinBidAmount.ToString("c2")</strong> or greater.
+        </div>
+
+        <form asp-controller="Bids" asp-action="Create" method="post" class="form-inline">
+            <div class="form-group">
+                <label for="bid-amount" class="sr-only">Bid Amount</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input type="text" id="bid-amount" name="Amount" class="form-control" placeholder="@Model.Product.NextMinBidAmount" />
+                </div>          
+            </div>
+
+            <input type="hidden" name="ProductId" value="@Model.Product.Id" />
+            <button type="submit" class="btn btn-primary">Place Bid</button>
+        </form>
+    </div>
+</div>
+
+@if (Model.Product.HasBids)
+{
+    <h3>Bid History</h3>
+
+    <table class="table table-condensed table-striped">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Amount</th>
+                <th>Bidder</th>
+            </tr>
+        </thead>
+        @foreach(var bid in Model.Bids) 
+        {
+            <tr>
+                <td>@bid.Timestamp.ToString("g")</td>
+                <td>@bid.Amount.ToString("c2")</td>
+                <td>@bid.UserName</td>
+            </tr>
+        }
+    </table>
+}
+

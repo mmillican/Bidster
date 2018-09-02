@@ -27,5 +27,7 @@ namespace Bidster.Entities.Products
 
         public int BidCount { get; set; }
         public bool HasBids => BidCount > 0;
+        
+        public decimal NextMinBidAmount => !HasBids ? CurrentBidAmount : CurrentBidAmount + MinimumBidAmount;
     }
 }

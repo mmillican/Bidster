@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Bidster.Data;
 using Bidster.Entities.Products;
 using Bidster.Entities.Users;
+using Bidster.Models;
 using Bidster.Models.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -29,9 +31,34 @@ namespace Bidster.Controllers
         }
 
         [HttpGet("{slug}")]
-        public IActionResult Details(string evtSlug, string slug)
+        public async Task<IActionResult> Details(string evtSlug, string slug)
         {
-            return View();
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            if (evt == null)
+            {
+                _logger.LogInformation("Event slug '{evtSlug}' not found", evtSlug);
+                return RedirectToAction("Index", "Events");
+            }
+
+            var product = await _dbContext.Products.SingleOrDefaultAsync(x => x.EventId == evt.Id && x.Slug == slug);
+            if (product == null)
+            {
+                _logger.LogInformation("Product slug '{slug}' not found or does not belong to event '{evtSlug}'", slug, evtSlug);
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+
+            var model = new ProductDetailsViewModel();
+            model.Event = ModelMapper.ToEventModel(evt);
+            model.Product = ModelMapper.ToProductModel(product);
+
+            model.Bids = await _dbContext.Bids
+                .Include(x => x.User)
+                .Where(x => x.ProductId == product.Id)
+                .OrderByDescending(x => x.Timestamp)
+                .Select(x => x.ToBidModel())
+                .ToListAsync();
+
+            return View(model);
         }
 
         [Authorize]

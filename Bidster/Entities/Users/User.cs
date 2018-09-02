@@ -12,6 +12,8 @@ namespace Bidster.Entities.Users
         [Required, MaxLength(50)]
         public string LastName { get; set; }
 
+        public string FullName => $"{FirstName} {LastName}";
+
         /// <summary>
         /// Navigation property for the roles this user belongs to.
         /// </summary>
