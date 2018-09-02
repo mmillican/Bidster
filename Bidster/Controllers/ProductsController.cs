@@ -1,0 +1,238 @@
+using System;
+using System.Threading.Tasks;
+using Bidster.Data;
+using Bidster.Entities.Products;
+using Bidster.Entities.Users;
+using Bidster.Models.Products;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Bidster.Controllers
+{
+    [Route("events/{evtSlug}/products")]
+    public class ProductsController : Controller
+    {
+        private readonly BidsterDbContext _dbContext;
+        private readonly UserManager<User> _userManager;
+        private readonly ILogger<ProductsController> _logger;
+
+        public ProductsController(BidsterDbContext dbContext,
+            UserManager<User> userManager,
+            ILogger<ProductsController> logger)
+        {
+            _dbContext = dbContext;
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        [HttpGet("{slug}")]
+        public IActionResult Details(string evtSlug, string slug)
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpGet("new")]
+        public async Task<IActionResult> Create(string evtSlug)
+        {
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (evt == null)
+            {
+                _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
+                return RedirectToAction("Index", "Events");
+            }
+
+            if (evt.OwnerId != user.Id)
+            {
+                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+
+            var model = new EditProductViewModel
+            {
+                EventId = evt.Id,
+                EventSlug = evt.Slug,
+                EventName = evt.Name
+            };
+
+            return View(model);
+        }
+
+        [HttpPost("new")]
+        public async Task<IActionResult> Create(string evtSlug, EditProductViewModel model)
+        {
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            if (evt == null)
+            {
+                _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
+                return RedirectToAction("Index", "Events");
+            }
+
+            if (evt.OwnerId != user.Id)
+            {
+                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+
+            // Reset event props in case something fails...
+            model.EventId = evt.Id;
+            model.EventSlug = evt.Slug;
+            model.EventName = evt.Name;
+
+            try
+            {
+                var product = new Product
+                {
+                    Event = evt,
+                    Name = model.Name,
+                    Description = model.Description,
+                    StartingPrice = model.StartingPrice,
+                    MinimumBidAmount = model.MinimumBidAmount,
+                    CurrentBidAmount = model.StartingPrice
+                };
+
+                product.Slug = await GenerateSlugAsync(evt.Id, product.Name);
+
+                _dbContext.Products.Add(product);
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding product '{name}' to event ID {evtId}", model.Name, evt.Id);
+
+                return View(model);
+            }
+        }
+
+        [HttpGet("edit/{id}")]
+        public async Task<IActionResult> Edit(string evtSlug, int id)
+        {
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (evt == null)
+            {
+                _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
+                return RedirectToAction("Index", "Events");
+            }
+
+            if (evt.OwnerId != user.Id)
+            {
+                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+
+            var product = await _dbContext.Products.FindAsync(id);
+            if (product == null || product.EventId != evt.Id)
+            {
+                _logger.LogInformation("Product ID {id} not found", id);
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+
+            var model = new EditProductViewModel
+            {
+                Id = id,
+
+                EventId = evt.Id,
+                EventSlug = evt.Slug,
+                EventName = evt.Name,
+
+                Name = product.Name,
+                Description = product.Description,
+                StartingPrice = product.StartingPrice,
+                MinimumBidAmount = product.MinimumBidAmount,
+                HasBids = product.HasBids
+            };
+
+            return View(model);
+        }
+
+        [HttpPost("edit/{id}")]
+        public async Task<IActionResult> Edit(string evtSlug, int id, EditProductViewModel model)
+        {
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (evt == null)
+            {
+                _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
+                return RedirectToAction("Index", "Events");
+            }
+
+            if (evt.OwnerId != user.Id)
+            {
+                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+
+            // Reset event props in case something fails...
+            model.Id = id;
+            model.EventId = evt.Id;
+            model.EventSlug = evt.Slug;
+            model.EventName = evt.Name;
+
+            var product = await _dbContext.Products.FindAsync(id);
+            if (product == null || product.EventId != evt.Id)
+            {
+                _logger.LogInformation("Product ID {id} not found", id);
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+
+            try
+            {
+                product.Name = model.Name;
+                product.Description = model.Description;
+                product.StartingPrice = model.StartingPrice;
+                product.MinimumBidAmount = model.MinimumBidAmount;
+
+                _dbContext.Products.Update(product);
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product ID {id}", id);
+
+                return View(model);
+            }
+        }
+
+        private async Task<string> GenerateSlugAsync(int eventId, string name)
+        {
+            var slug = name.Clean();
+
+            if (!await DoesSlugExist(eventId, slug))
+            {
+                return slug;
+            }
+        
+            var appendIdx = 1;
+            var modSlug = $"{slug}-{appendIdx})";
+            while (await DoesSlugExist(eventId, modSlug))
+            {
+                appendIdx++;
+                modSlug = $"{slug}-{appendIdx})";
+            }
+
+            return modSlug;
+        }
+
+        private async Task<bool> DoesSlugExist(int eventId, string slug) =>
+            await _dbContext.Products.AnyAsync(x => x.EventId == eventId && x.Slug == slug);
+    }
+}

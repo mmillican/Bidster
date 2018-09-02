@@ -3,8 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bidster.Data;
 using Bidster.Entities.Events;
+using Bidster.Entities.Products;
 using Bidster.Entities.Users;
 using Bidster.Models.Events;
+using Bidster.Models.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -58,6 +60,10 @@ namespace Bidster.Controllers
             {
                 Event = ToEventModel(evt)
             };
+
+            model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)
+                .Select(x => ToProductModel(x))
+                .ToListAsync();
 
             return View(model);
         }
@@ -194,6 +200,20 @@ namespace Bidster.Controllers
             EndOn = evt.EndOn,
             OwnerId = evt.OwnerId,
             CreatedOn = evt.CreatedOn
+        };
+
+        private static ProductModel ToProductModel(Product product) => new ProductModel
+        {
+            Id = product.Id,
+            EventId = product.EventId,
+            Slug = product.Slug,
+            Name = product.Name,
+            Description = product.Description,
+            StartingPrice = product.StartingPrice,
+            MinimumBidAmount = product.MinimumBidAmount,
+            CurrentBidAmount = product.CurrentBidAmount,
+            CurrentHighBidUserId = product.CurrentHighBidUserId,
+            BidCount = product.BidCount
         };
     }
 }
