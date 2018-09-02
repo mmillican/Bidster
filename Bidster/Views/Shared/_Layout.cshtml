@@ -41,6 +41,11 @@
     <partial name="_CookieConsentPartial" />
 
     <div class="container body-content">
+        @if (!string.IsNullOrEmpty(ViewBag.PreHeading))
+        {
+            <h2>@ViewBag.PreHeading</h2>
+        }
+        
         <h1>
             @ViewBag.Title
         </h1>
