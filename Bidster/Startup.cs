@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Bidster.Entities.Users;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Bidster.Services;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Bidster
 {
@@ -47,7 +48,8 @@ namespace Bidster
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             
-            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IEmailSender, EmailSender>();            
+            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

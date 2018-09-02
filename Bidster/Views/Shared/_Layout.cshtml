@@ -41,7 +41,14 @@
     <partial name="_CookieConsentPartial" />
 
     <div class="container body-content">
+        <h1>
+            @ViewBag.Title
+        </h1>
+
+        <partial name="_NoticeDisplay" />
+        
         @RenderBody()
+        
         <hr />
         <footer>
             <p>&copy; 2018 - Bidster</p>

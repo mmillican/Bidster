@@ -1,0 +1,12 @@
+@{ 
+    var notices = TempData.GetTempData<List<NoticeModel>>("_Notices") ?? new List<NoticeModel>();
+}
+
+<div class="cms-notices">
+    @foreach (var notice in notices)
+    {
+        <div class="alert @notice.Type">
+            @Html.Raw(notice.Message)
+        </div>
+    }
+</div>
