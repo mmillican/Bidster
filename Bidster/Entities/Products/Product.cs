@@ -22,9 +22,10 @@ namespace Bidster.Entities.Products
         public decimal StartingPrice { get; set; }
         public decimal MinimumBidAmount { get; set; }
 
-        public decimal? CurrentBidAmount { get; set; }
+        public decimal CurrentBidAmount { get; set; }
         public int? CurrentHighBidUserId { get; set; }
 
         public int BidCount { get; set; }
+        public bool HasBids => BidCount > 0;
     }
 }
