@@ -5,6 +5,7 @@ using Bidster.Data;
 using Bidster.Entities.Events;
 using Bidster.Entities.Products;
 using Bidster.Entities.Users;
+using Bidster.Models;
 using Bidster.Models.Events;
 using Bidster.Models.Products;
 using Microsoft.AspNetCore.Authorization;
@@ -35,7 +36,7 @@ namespace Bidster.Controllers
         public async Task<IActionResult> Index()
         {
             var events = await _dbContext.Events
-                .Select(x => ToEventModel(x))
+                .Select(x => ModelMapper.ToEventModel(x))
                 .ToListAsync();
 
             var model = new EventListViewModel
@@ -58,11 +59,11 @@ namespace Bidster.Controllers
 
             var model = new EventDetailsViewModel
             {
-                Event = ToEventModel(evt)
+                Event = ModelMapper.ToEventModel(evt)
             };
 
             model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)
-                .Select(x => ToProductModel(x))
+                .Select(x => ModelMapper.ToProductModel(x))
                 .ToListAsync();
 
             return View(model);
@@ -190,30 +191,5 @@ namespace Bidster.Controllers
 
             return modSlug;
         }
-
-        private static EventModel ToEventModel(Event evt) => new EventModel
-        {
-            Id = evt.Id,
-            Slug = evt.Slug,
-            Name = evt.Name,
-            StartOn = evt.StartOn,
-            EndOn = evt.EndOn,
-            OwnerId = evt.OwnerId,
-            CreatedOn = evt.CreatedOn
-        };
-
-        private static ProductModel ToProductModel(Product product) => new ProductModel
-        {
-            Id = product.Id,
-            EventId = product.EventId,
-            Slug = product.Slug,
-            Name = product.Name,
-            Description = product.Description,
-            StartingPrice = product.StartingPrice,
-            MinimumBidAmount = product.MinimumBidAmount,
-            CurrentBidAmount = product.CurrentBidAmount,
-            CurrentHighBidUserId = product.CurrentHighBidUserId,
-            BidCount = product.BidCount
-        };
     }
 }
