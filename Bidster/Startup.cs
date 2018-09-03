@@ -16,6 +16,7 @@ using Bidster.Entities.Users;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Bidster.Services;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Bidster.Configuration;
 
 namespace Bidster
 {
@@ -52,7 +53,9 @@ namespace Bidster
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            
+
+            services.Configure<UserConfig>(Configuration.GetSection("Users"));
+
             services.AddSingleton<IEmailSender, EmailSender>();            
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
         }

@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Bidster.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Bidster.Areas.Identity.Pages.Account
 {
@@ -18,19 +22,25 @@ namespace Bidster.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly UserConfig _userConfig;
 
         public RegisterModel(
             UserManager<User> userManager,
+            RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IOptions<UserConfig> userConfig)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _userConfig = userConfig.Value;
         }
 
         [BindProperty]
@@ -87,6 +97,11 @@ namespace Bidster.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    if (_userConfig.DoFirstUserCheck && await IsFirstUserAsync(user.Id))
+                    {
+                        await SetupFirstUserAsync(user);
+                    }
+
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
@@ -108,6 +123,32 @@ namespace Bidster.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        private async Task<bool> IsFirstUserAsync(int userId) => !await _userManager.Users.AnyAsync(x => x.Id != userId);
+
+        private async Task SetupFirstUserAsync(User user)
+        {
+            _logger.LogInformation("Running set up for first user");
+
+            const string adminRoleName = "Admin";
+
+            // Create the role if it doesn't exist
+            var adminRole = await _roleManager.FindByNameAsync(adminRoleName);
+            if (adminRole == null)
+            {
+                _logger.LogInformation("Role '{role}' does not exist; creating new role.", adminRoleName);
+
+                adminRole = new Role
+                {
+                    Name = adminRoleName
+                };
+                await _roleManager.CreateAsync(adminRole);
+            }
+
+            await _userManager.AddToRoleAsync(user, adminRoleName);
+
+            _logger.LogInformation("User '{user}' added to role '{role}'", user.UserName, adminRole.Name);
         }
     }
 }
