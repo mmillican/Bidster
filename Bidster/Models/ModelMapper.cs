@@ -1,3 +1,4 @@
+using System;
 using Bidster.Entities.Bids;
 using Bidster.Entities.Events;
 using Bidster.Entities.Products;
@@ -17,7 +18,8 @@ namespace Bidster.Models
             StartOn = evt.StartOn,
             EndOn = evt.EndOn,
             OwnerId = evt.OwnerId,
-            CreatedOn = evt.CreatedOn
+            CreatedOn = evt.CreatedOn,
+            IsBiddingOpen = evt.IsBiddingOpen(DateTime.Now)
         };
 
         public static ProductModel ToProductModel(this Product product) => new ProductModel

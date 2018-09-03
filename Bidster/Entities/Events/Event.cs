@@ -22,5 +22,8 @@ namespace Bidster.Entities.Events
         public virtual User Owner { get; set; }
 
         public DateTime CreatedOn { get; set; }
+
+
+        public bool IsBiddingOpen(DateTime date) => StartOn <= date && EndOn > date;
     }
 }

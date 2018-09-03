@@ -41,6 +41,17 @@ namespace Bidster.Controllers
             var evt = await _dbContext.Events.FindAsync(product.EventId);
             var user = await _userManager.GetUserAsync(User);
 
+            if (product == null)
+            {
+                _logger.LogInformation("Product ID {id} not found.", model.ProductId);
+                return NotFound($"Product ID {model.ProductId} not found");
+            }
+
+            if (!evt.IsBiddingOpen(DateTime.Now))
+            {
+                return BadRequest("Bidding is not open");
+            }
+
             var lastBid = await _dbContext.Bids
                 .Where(x => x.ProductId == product.Id)
                 .OrderByDescending(x => x.Timestamp)

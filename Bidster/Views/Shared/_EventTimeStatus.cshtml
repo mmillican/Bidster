@@ -1,0 +1,22 @@
+﻿@model Bidster.Models.Events.EventModel
+
+@if (Model.StartOn <= DateTime.Now && Model.EndOn > DateTime.Now)
+{
+    <div class="alert alert-success">
+        <h4>Bidding is open!</h4>
+
+        Bidding is open until <strong>@(Model.EndOn.ToString("h:mm tt on ddd, MMM dd, yyyy"))</strong>
+    </div>
+}
+else if (Model.StartOn > DateTime.Now)
+{
+    <div class="alert alert-info">
+        Bidding is opens at <strong>@(Model.StartOn.ToString("h:mm tt on ddd, MMM dd, yyyy"))</strong>
+    </div>
+}
+else if (Model.EndOn < DateTime.Now)
+{
+    <div class="alert alert-warning">
+        Bidding is closed at <strong>@(Model.EndOn.ToString("h:mm tt on ddd, MMM dd, yyyy"))</strong>
+    </div>
+}
