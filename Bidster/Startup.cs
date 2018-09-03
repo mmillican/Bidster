@@ -46,6 +46,11 @@ namespace Bidster
                 .AddEntityFrameworkStores<BidsterDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.ConfigureApplicationCookie(opts =>
+            {
+                opts.LoginPath = "/Identity/Account/Login";
+            });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             
             services.AddSingleton<IEmailSender, EmailSender>();            
