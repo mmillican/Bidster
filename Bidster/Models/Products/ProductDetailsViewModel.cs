@@ -11,5 +11,7 @@ namespace Bidster.Models.Products
         public EventModel Event { get; set; }
 
         public List<BidModel> Bids { get; set; }
+
+        public bool CanUserEdit { get; set; }
     }
 }

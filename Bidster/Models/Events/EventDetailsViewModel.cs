@@ -8,5 +8,7 @@ namespace Bidster.Models.Events
         public EventModel Event { get; set; }
 
         public List<ProductModel> Products { get; set; }
+
+        public bool CanUserEdit { get; set; }
     }
 }

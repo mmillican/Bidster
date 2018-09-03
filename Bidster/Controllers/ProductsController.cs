@@ -47,9 +47,12 @@ namespace Bidster.Controllers
                 return RedirectToAction("Details", "Events", new { slug = evtSlug });
             }
 
+            var user = await _userManager.GetUserAsync(User);
+
             var model = new ProductDetailsViewModel();
             model.Event = ModelMapper.ToEventModel(evt);
             model.Product = ModelMapper.ToProductModel(product);
+            model.CanUserEdit = user != null && user.Id == evt.OwnerId;
 
             model.Bids = await _dbContext.Bids
                 .Include(x => x.User)
@@ -90,6 +93,7 @@ namespace Bidster.Controllers
             return View(model);
         }
 
+        [Authorize]
         [HttpPost("new")]
         public async Task<IActionResult> Create(string evtSlug, EditProductViewModel model)
         {
@@ -145,6 +149,7 @@ namespace Bidster.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(string evtSlug, int id)
         {
@@ -188,6 +193,7 @@ namespace Bidster.Controllers
             return View(model);
         }
 
+        [Authorize]
         [HttpPost("edit/{id}")]
         public async Task<IActionResult> Edit(string evtSlug, int id, EditProductViewModel model)
         {

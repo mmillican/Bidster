@@ -57,9 +57,12 @@ namespace Bidster.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var user = await _userManager.GetUserAsync(User);
+
             var model = new EventDetailsViewModel
             {
-                Event = ModelMapper.ToEventModel(evt)
+                Event = ModelMapper.ToEventModel(evt),
+                CanUserEdit = user != null && user.Id == evt.OwnerId
             };
 
             model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)

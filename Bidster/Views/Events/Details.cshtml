@@ -1,11 +1,10 @@
 @model Bidster.Models.Events.EventDetailsViewModel
-@inject SignInManager<User> SignInManager
 
 @{
     ViewBag.Title = Model.Event.Name;
 }
 
-@if (SignInManager.IsSignedIn(User))
+@if (Model.CanUserEdit)
 {
     <p>
         <a asp-action="Edit" asp-route-id="@Model.Event.Id" class="btn btn-default">Edit</a>
@@ -37,7 +36,7 @@
             <td>@product.BidCount</td>
             <td>@product.MinimumBidAmount.ToString("c2")</td>
             <td>
-                @if (SignInManager.IsSignedIn(User))
+                @if (Model.CanUserEdit)
                 {
                     <a asp-action="Edit" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" asp-route-id="@product.Id">Edit</a>
                 }

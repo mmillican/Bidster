@@ -1,7 +1,15 @@
 @model Bidster.Models.Products.ProductDetailsViewModel
+
 @{
     ViewBag.PreHeading = Model.Event.Name;
     ViewBag.Title = $"{Model.Product.Name} - {Model.Event.Name}";
+}
+
+@if (Model.CanUserEdit)
+{
+    <p>
+        <a asp-action="Edit" asp-route-evtSlug="@Model.Event.Slug" asp-route-id="@Model.Product.Id" class="btn btn-default">Edit</a>
+    </p>
 }
 
 <p class="description">
