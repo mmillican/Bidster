@@ -4,6 +4,17 @@
     ViewBag.Title = Model.Event.Name;
 }
 
+@section Jumbotron
+{
+    <div class="jumbotron">
+        <div class="container">
+            <h1>@Model.Event.Name</h1>
+
+            <h3>@Model.Event.StartOn.ToString("ddd, MMM d, h:mm tt") - @Model.Event.EndOn.ToString("ddd, MMM d, yyyy, h:mm tt")</h3>
+        </div>
+    </div>
+}
+
 @if (Model.CanUserEdit)
 {
     <p>

@@ -40,20 +40,25 @@
 
     <partial name="_CookieConsentPartial" />
 
+    @RenderSection("Jumbotron", false)
+
     <div class="container body-content">
-        @if (!string.IsNullOrEmpty(ViewBag.PreHeading))
+        @if (!IsSectionDefined("Jumbotron"))
         {
-            <h2>@ViewBag.PreHeading</h2>
+            @if (!string.IsNullOrEmpty(ViewBag.PreHeading))
+            {
+                <h2>@ViewBag.PreHeading</h2>
+            }
+
+            <h1>
+                @ViewBag.Title
+            </h1>
         }
-        
-        <h1>
-            @ViewBag.Title
-        </h1>
 
         <partial name="_NoticeDisplay" />
-        
+
         @RenderBody()
-        
+
         <hr />
         <footer>
             <p>&copy; 2018 - Bidster</p>

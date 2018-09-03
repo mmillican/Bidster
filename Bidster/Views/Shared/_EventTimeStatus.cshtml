@@ -11,12 +11,12 @@
 else if (Model.StartOn > DateTime.Now)
 {
     <div class="alert alert-info">
-        Bidding is opens at <strong>@(Model.StartOn.ToString("h:mm tt on ddd, MMM dd, yyyy"))</strong>
+        Bidding opens at <strong>@(Model.StartOn.ToString("h:mm tt on ddd, MMM dd, yyyy"))</strong>
     </div>
 }
 else if (Model.EndOn < DateTime.Now)
 {
     <div class="alert alert-warning">
-        Bidding is closed at <strong>@(Model.EndOn.ToString("h:mm tt on ddd, MMM dd, yyyy"))</strong>
+        Bidding closed at <strong>@(Model.EndOn.ToString("h:mm tt on ddd, MMM dd, yyyy"))</strong>
     </div>
 }
