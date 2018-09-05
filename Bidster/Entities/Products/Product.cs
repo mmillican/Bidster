@@ -29,5 +29,8 @@ namespace Bidster.Entities.Products
         public bool HasBids => BidCount > 0;
         
         public decimal NextMinBidAmount => !HasBids ? CurrentBidAmount : CurrentBidAmount + MinimumBidAmount;
+
+        [MaxLength(100)]
+        public string ImageFilename { get; set; }
     }
 }
