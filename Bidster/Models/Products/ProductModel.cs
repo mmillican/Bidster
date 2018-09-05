@@ -24,5 +24,8 @@ namespace Bidster.Models.Products
         public bool HasBids => BidCount > 0;
 
         public decimal NextMinBidAmount { get; set; }
+
+        public string ImageFilename { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

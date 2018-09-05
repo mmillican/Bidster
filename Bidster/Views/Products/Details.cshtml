@@ -2,7 +2,7 @@
 
 @{
     ViewBag.PreHeading = Model.Event.Name;
-    ViewBag.Title = $"{Model.Product.Name} - {Model.Event.Name}";
+    ViewBag.Title = Model.Product.Name;
 }
 
 @if (Model.CanUserEdit)
@@ -13,10 +13,16 @@
 }
 
 <p class="description">
+    @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+    {
+        <!-- TODO: Show resized image -->
+        <img src="@Model.Product.ImageUrl" class="pull-right img-thumbnail" width="400" />
+    }
+
     @Model.Product.Description
 </p>
 
-<partial name="_EventTimeStatus" model="@Model.Event" />
+@*<partial name="_EventTimeStatus" model="@Model.Event" />*@
 
 @if (Model.Event.IsBiddingOpen)
 {

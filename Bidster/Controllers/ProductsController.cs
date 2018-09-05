@@ -60,6 +60,12 @@ namespace Bidster.Controllers
             var model = new ProductDetailsViewModel();
             model.Event = ModelMapper.ToEventModel(evt);
             model.Product = ModelMapper.ToProductModel(product);
+            
+            if (!string.IsNullOrEmpty(product.ImageFilename))
+            {
+                model.Product.ImageUrl = _fileService.ResolveFileUrl(string.Format(ImagePathFormat, evt.Slug, product.ImageFilename));
+            }
+
             model.CanUserEdit = user != null && user.Id == evt.OwnerId;
 
             model.Bids = await _dbContext.Bids
