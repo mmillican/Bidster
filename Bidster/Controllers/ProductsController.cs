@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Bidster.Data;
@@ -6,6 +7,7 @@ using Bidster.Entities.Products;
 using Bidster.Entities.Users;
 using Bidster.Models;
 using Bidster.Models.Products;
+using Bidster.Services.FileStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,16 +19,22 @@ namespace Bidster.Controllers
     [Route("events/{evtSlug}/products")]
     public class ProductsController : Controller
     {
+        // 0 = event slug --- 1 == filename
+        private const string ImagePathFormat = "events/{0}/products/{1}";
+
         private readonly BidsterDbContext _dbContext;
         private readonly UserManager<User> _userManager;
+        private readonly IFileService _fileService;
         private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(BidsterDbContext dbContext,
             UserManager<User> userManager,
+            IFileService fileService,
             ILogger<ProductsController> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _fileService = fileService;
             _logger = logger;
         }
 
@@ -139,6 +147,22 @@ namespace Bidster.Controllers
                 _dbContext.Products.Add(product);
                 await _dbContext.SaveChangesAsync();
 
+                // Save image after the product is created because we need the ID
+                if (model.ImageFile != null)
+                {
+                    product.ImageFilename = GenerateImageFilename(product, model.ImageFile.FileName);
+
+                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ImageFilename);
+
+                    using (var stream = model.ImageFile.OpenReadStream())
+                    {
+                        await _fileService.SaveFileAsync(imagePath, model.ImageFile.ContentType, stream);
+                    }
+
+                    _dbContext.Products.Update(product);
+                    await _dbContext.SaveChangesAsync();
+                }
+
                 return RedirectToAction("Details", "Events", new { slug = evtSlug });
             }
             catch (Exception ex)
@@ -187,8 +211,16 @@ namespace Bidster.Controllers
                 Description = product.Description,
                 StartingPrice = product.StartingPrice,
                 MinimumBidAmount = product.MinimumBidAmount,
-                HasBids = product.HasBids
+                HasBids = product.HasBids,
+
+                ImageFilename  = product.ImageFilename
             };
+
+            if (!string.IsNullOrEmpty(model.ImageFilename))
+            {
+                var path = string.Format(ImagePathFormat, evt.Slug, product.ImageFilename);
+                model.ImageUrl = _fileService.ResolveFileUrl(path);
+            }
 
             return View(model);
         }
@@ -232,6 +264,18 @@ namespace Bidster.Controllers
                 product.StartingPrice = model.StartingPrice;
                 product.MinimumBidAmount = model.MinimumBidAmount;
 
+                if (model.ImageFile != null)
+                {
+                    product.ImageFilename = GenerateImageFilename(product, model.ImageFile.FileName);
+
+                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ImageFilename);
+
+                    using (var stream = model.ImageFile.OpenReadStream())
+                    {
+                        await _fileService.SaveFileAsync(imagePath, model.ImageFile.ContentType, stream);
+                    }
+                }
+
                 _dbContext.Products.Update(product);
                 await _dbContext.SaveChangesAsync();
 
@@ -267,5 +311,24 @@ namespace Bidster.Controllers
 
         private async Task<bool> DoesSlugExist(int eventId, string slug) =>
             await _dbContext.Products.AnyAsync(x => x.EventId == eventId && x.Slug == slug);
+
+        private static string GenerateImageFilename(Product product, string origFilename)
+        {
+            if (product == null)
+            {
+                throw new ArgumentNullException(nameof(product));
+            }
+            if (string.IsNullOrEmpty(origFilename))
+            {
+                throw new ArgumentException("message", nameof(origFilename));
+            }
+
+            var fileExt = Path.GetExtension(origFilename);
+
+            var sluggedProductName = product.Slug.Truncate(90);
+            var filename = $"{product.Id}-{sluggedProductName}{fileExt}";
+
+            return filename;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Bidster.Models.Products
 {
@@ -20,5 +21,9 @@ namespace Bidster.Models.Products
         public decimal MinimumBidAmount { get; set; }
 
         public bool HasBids { get; set; }
+
+        public IFormFile ImageFile { get; set; }
+        public string ImageFilename { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

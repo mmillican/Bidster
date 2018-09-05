@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Bidster.Services;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Bidster.Configuration;
+using Amazon.S3;
+using Bidster.Services.FileStorage;
 
 namespace Bidster
 {
@@ -55,9 +57,17 @@ namespace Bidster
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
+            services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
 
             services.AddSingleton<IEmailSender, EmailSender>();            
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
+
+            if (Configuration["FileStorage:storageType"].ToLower() == "amazons3")
+            {
+                services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
+                services.AddAWSService<IAmazonS3>();
+                services.AddTransient<IFileService, AmazonS3FileService>();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
