@@ -73,6 +73,59 @@ namespace Bidster.Controllers
         }
 
         [Authorize]
+        [HttpGet("{slug}/all-bids")]
+        public async Task<IActionResult> AllBids(string slug)
+        {
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == slug);
+            if (evt == null)
+            {
+                _logger.LogInformation("Event not found for slug '{slug}'", slug);
+                return RedirectToAction(nameof(Index));
+            }
+
+            var eventProducts = await _dbContext.Products
+                .Where(x => x.EventId == evt.Id)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var productBidGroups = await (from bid in _dbContext.Bids.Include(x => x.User)
+                                          join prod in _dbContext.Products on bid.ProductId equals prod.Id
+                                          where prod.EventId == evt.Id
+                                          group bid by bid.ProductId into g
+                                          select new
+                                          {
+                                              ProductId = g.Key,
+                                              Bids = g.OrderByDescending(x => x.Timestamp)
+                                          })
+                                    .AsNoTracking()
+                                    .ToListAsync();
+
+            var model = new AllBidsReportViewModel
+            {
+                Event = evt.ToEventModel()
+            };
+
+            foreach (var pbg in productBidGroups)
+            {
+                var product = eventProducts.SingleOrDefault(x => x.Id == pbg.ProductId);
+                if (product == null)
+                {
+                    continue;
+                }
+
+                var pgm = new AllBidsReportViewModel.ProductGroupModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Bids = pbg.Bids.Select(x => x.ToBidModel()).ToList()
+                };
+                model.Products.Add(pgm);
+            }
+
+            return View(model);
+        }
+
+        [Authorize]
         [HttpGet("new")]
         public IActionResult Create()
         {
