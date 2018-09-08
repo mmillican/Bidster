@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Bidster.Data;
+using Bidster.Entities.Events;
 using Bidster.Entities.Products;
 using Bidster.Entities.Users;
 using Bidster.Models;
@@ -66,7 +67,7 @@ namespace Bidster.Controllers
                 model.Product.ImageUrl = _fileService.ResolveFileUrl(string.Format(ImagePathFormat, evt.Slug, product.ImageFilename));
             }
 
-            model.CanUserEdit = user != null && user.Id == evt.OwnerId;
+            model.CanUserEdit = await AuthorizeEventAdmin(evt);
 
             model.Bids = await _dbContext.Bids
                 .Include(x => x.User)
@@ -91,10 +92,9 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            if (evt.OwnerId != user.Id)
+            if (!await AuthorizeEventAdmin(evt))
             {
-                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
-                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+                return Unauthorized();
             }
 
             var model = new EditProductViewModel
@@ -125,10 +125,9 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            if (evt.OwnerId != user.Id)
+            if (!await AuthorizeEventAdmin(evt))
             {
-                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
-                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+                return Unauthorized();
             }
 
             // Reset event props in case something fails...
@@ -192,10 +191,9 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            if (evt.OwnerId != user.Id)
+            if (!await AuthorizeEventAdmin(evt))
             {
-                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
-                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+                return Unauthorized();
             }
 
             var product = await _dbContext.Products.FindAsync(id);
@@ -244,10 +242,9 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            if (evt.OwnerId != user.Id)
+            if (!await AuthorizeEventAdmin(evt))
             {
-                _logger.LogInformation("Cannot edit event '{slug}' because user ID '{userId}' is not the owner", evtSlug, user.Id);
-                return RedirectToAction("Details", "Events", new { slug = evtSlug });
+                return Unauthorized();
             }
 
             // Reset event props in case something fails...
@@ -335,6 +332,28 @@ namespace Bidster.Controllers
             var filename = $"{product.Id}-{sluggedProductName}{fileExt}";
 
             return filename;
+        }
+
+        // TODO: Would be nice to have this be an actual auth policy, but need to figure out adding claims first
+        private async Task<bool> AuthorizeEventAdmin(Event evt)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return false;
+            }
+
+            if (user.Id == evt.OwnerId)
+            {
+                return true;
+            }
+
+            var isEventAdmin = await _dbContext.EventUsers
+                .AnyAsync(x => x.EventId == evt.Id
+                    && x.UserId == user.Id
+                    && x.IsAdmin);
+
+            return isEventAdmin;
         }
     }
 }

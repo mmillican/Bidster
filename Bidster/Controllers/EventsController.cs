@@ -21,14 +21,17 @@ namespace Bidster.Controllers
     {
         private readonly BidsterDbContext _dbContext;
         private readonly UserManager<User> _userManager;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<EventsController> _logger;
 
         public EventsController(BidsterDbContext dbContext,
             UserManager<User> userManager,
+            IAuthorizationService authorizationService,
             ILogger<EventsController> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _authorizationService = authorizationService;
             this._logger = logger;
         }
 
@@ -50,7 +53,7 @@ namespace Bidster.Controllers
         [HttpGet("{slug}")]
         public async Task<IActionResult> Details(string slug)
         {
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == slug);
+            var evt = await _dbContext.Events.Include(x => x.Users).SingleOrDefaultAsync(x => x.Slug == slug);
             if (evt == null)
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
@@ -61,9 +64,9 @@ namespace Bidster.Controllers
 
             var model = new EventDetailsViewModel
             {
-                Event = ModelMapper.ToEventModel(evt),
-                CanUserEdit = user != null && user.Id == evt.OwnerId
+                Event = ModelMapper.ToEventModel(evt)
             };
+            model.CanUserEdit = await AuthorizeEventAdmin(evt);
 
             model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)
                 .Select(x => ModelMapper.ToProductModel(x))
@@ -81,6 +84,11 @@ namespace Bidster.Controllers
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
                 return RedirectToAction(nameof(Index));
+            }
+
+            if (!await AuthorizeEventAdmin(evt))
+            {
+                return Unauthorized();
             }
 
             var eventProducts = await _dbContext.Products
@@ -176,10 +184,15 @@ namespace Bidster.Controllers
         {
             var evt = await _dbContext.Events.FindAsync(id);
             var user = await _userManager.GetUserAsync(User);
-            if (evt == null || evt.OwnerId != user.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event ID '{id}'", id);
                 return RedirectToAction(nameof(Index));
+            }
+
+            if (!await AuthorizeEventAdmin(evt))
+            {
+                return Unauthorized();
             }
 
             var model = new EditEventViewModel
@@ -204,10 +217,15 @@ namespace Bidster.Controllers
             
             var evt = await _dbContext.Events.FindAsync(id);
             var user = await _userManager.GetUserAsync(User);
-            if (evt == null || evt.OwnerId != user.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event ID '{id}'", id);
                 return RedirectToAction(nameof(Index));
+            }
+
+            if (!await AuthorizeEventAdmin(evt))
+            {
+                return Unauthorized();
             }
 
             try
@@ -246,6 +264,28 @@ namespace Bidster.Controllers
             }
 
             return modSlug;
+        }
+
+        // TODO: Would be nice to have this be an actual auth policy, but need to figure out adding claims first
+        private async Task<bool> AuthorizeEventAdmin(Event evt)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return false;
+            }
+
+            if (user.Id == evt.OwnerId)
+            {
+                return true;
+            }
+
+            var isEventAdmin = await _dbContext.EventUsers
+                .AnyAsync(x => x.EventId == evt.Id
+                    && x.UserId == user.Id
+                    && x.IsAdmin);
+
+            return isEventAdmin;
         }
     }
 }

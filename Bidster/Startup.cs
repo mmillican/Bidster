@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Bidster.Configuration;
 using Amazon.S3;
 using Bidster.Services.FileStorage;
+using Bidster.Auth;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Bidster
 {
@@ -55,6 +57,13 @@ namespace Bidster
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            // TODO: Can't inject any scoped services into auth handlers, so need to figure out how to get this to work
+            //services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy("EventAdmin", policy => policy.AddRequirements(new EventAdminRequirement()));
+            //});
+            //services.AddSingleton<IAuthorizationHandler, EventAdminHandler>();
 
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
