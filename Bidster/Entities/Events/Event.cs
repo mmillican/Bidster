@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Bidster.Entities.Users;
@@ -25,5 +26,7 @@ namespace Bidster.Entities.Events
 
 
         public bool IsBiddingOpen(DateTime date) => StartOn <= date && EndOn > date;
+
+        public virtual List<EventUser> Users { get; set; }
     }
 }

@@ -11,6 +11,8 @@ namespace Bidster.Data
     public class BidsterDbContext : IdentityDbContext<User, Role, int>
     {
         public DbSet<Event> Events { get; set; }
+        public DbSet<EventUser> EventUsers { get; set; }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Bid> Bids { get; set; }
 

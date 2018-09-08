@@ -4,6 +4,7 @@ using Bidster.Entities.Events;
 using Bidster.Entities.Products;
 using Bidster.Models.Bids;
 using Bidster.Models.Events;
+using Bidster.Models.EventUsers;
 using Bidster.Models.Products;
 
 namespace Bidster.Models
@@ -46,6 +47,17 @@ namespace Bidster.Models
             UserName = bid.User.FullName,
             Timestamp = bid.Timestamp,
             Amount = bid.Amount
+        };
+
+        public static EventUserModel ToEventUserModel(this EventUser evtUser) => new EventUserModel
+        {
+            Id = evtUser.Id,
+            EventId = evtUser.EventId,
+            UserId = evtUser.User.Id,
+            UserName = evtUser.User.FullName,
+            UserEmail = evtUser.User.Email,
+            IsAdmin = evtUser.IsAdmin,
+            CreatedOn = evtUser.CreatedOn
         };
     }
 }

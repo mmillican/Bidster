@@ -20,7 +20,8 @@
     <p>
         <a asp-action="Edit" asp-route-id="@Model.Event.Id" class="btn btn-default">Edit</a>
         <a asp-action="Create" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" class="btn btn-success">New Product</a>
-        <a asp-action="AllBids" asp-route-slug="@Model.Event.Slug" class="btn btn-default">View All Bids</a>
+        <a asp-action="AllBids" asp-route-slug="@Model.Event.Slug" class="btn btn-link">View All Bids</a>
+        <a asp-action="Index" asp-controller="EventUsers" asp-route-evtSlug="@Model.Event.Slug" class="btn btn-link">Event Users</a>
     </p>
 }
 
