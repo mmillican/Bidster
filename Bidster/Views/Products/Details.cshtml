@@ -61,6 +61,13 @@
 {
     <h3>Bid History</h3>
 
+    @if (Model.Event.HideBidderNames && Model.CanUserEdit)
+    {
+        <div class="alert alert-info">
+            Bidder names are hidden to public and only visible to event admins.
+        </div>
+    }
+
     <table class="table table-condensed table-striped">
         <thead>
             <tr>
@@ -74,7 +81,16 @@
             <tr>
                 <td>@bid.Amount.ToString("c2")</td>
                 <td>@bid.Timestamp.ToString("g")</td>
-                <td>@bid.UserName</td>
+                <td>
+                    @if (!Model.Event.HideBidderNames || Model.CanUserEdit)
+                    {
+                        @bid.UserName
+                    }
+                    else if (Model.Event.HideBidderNames)
+                    {
+                        <em>Bidder names private</em>
+                    }
+                </td>
             </tr>
         }
     </table>

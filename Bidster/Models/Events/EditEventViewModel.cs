@@ -12,5 +12,7 @@ namespace Bidster.Models.Events
 
         public DateTime StartOn { get; set; }
         public DateTime EndOn { get; set; }
+
+        public bool HideBidderNames { get; set; }
     }
 }

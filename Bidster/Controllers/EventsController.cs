@@ -160,6 +160,7 @@ namespace Bidster.Controllers
                     Name = model.Name,
                     StartOn = model.StartOn,
                     EndOn = model.EndOn,
+                    HideBidderNames = model.HideBidderNames,
                     Owner = user,
                     CreatedOn = DateTime.UtcNow
                 };
@@ -200,7 +201,8 @@ namespace Bidster.Controllers
                 Id = evt.Id,
                 Name = evt.Name,
                 StartOn = evt.StartOn,
-                EndOn = evt.EndOn
+                EndOn = evt.EndOn,
+                HideBidderNames = evt.HideBidderNames
             };
 
             return View(model);
@@ -233,6 +235,7 @@ namespace Bidster.Controllers
                 evt.Name = model.Name;
                 evt.StartOn = model.StartOn;
                 evt.EndOn = model.EndOn;
+                evt.HideBidderNames = model.HideBidderNames;
 
                 _dbContext.Events.Update(evt);
                 await _dbContext.SaveChangesAsync();

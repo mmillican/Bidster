@@ -19,6 +19,13 @@
                 <label asp-for="EndOn"></label>
                 <input type="date" asp-for="EndOn" class="form-control" />
             </div>
+            <div class="checkbox">
+                <label asp-for="HideBidderNames">
+                    <input asp-for="HideBidderNames" />
+                    Hide bidder names
+                    <span class="text-muted">(Names are still visible to event admins)</span>
+                </label>
+            </div>
 
             <button type="submit" class="btn btn-primary">Create Event</button>
         </form>

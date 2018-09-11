@@ -20,6 +20,7 @@ namespace Bidster.Models
             EndOn = evt.EndOn,
             OwnerId = evt.OwnerId,
             CreatedOn = evt.CreatedOn,
+            HideBidderNames = evt.HideBidderNames,
             IsBiddingOpen = evt.IsBiddingOpen(DateTime.Now)
         };
 

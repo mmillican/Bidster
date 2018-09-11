@@ -18,6 +18,8 @@ namespace Bidster.Entities.Events
         public DateTime StartOn { get; set; }
         public DateTime EndOn { get; set; }
 
+        public bool HideBidderNames { get; set; }
+
         public int OwnerId { get; set; }
         [ForeignKey(nameof(OwnerId))]
         public virtual User Owner { get; set; }

@@ -13,6 +13,7 @@ namespace Bidster.Models.Events
         public DateTime EndOn { get; set; }
 
         public int OwnerId { get; set; }
+        public bool HideBidderNames { get; set; }
 
         public DateTime CreatedOn { get; set; }
 
