@@ -20,30 +20,38 @@
     }
 
     @Model.Product.Description
+
+    <hr />
 </p>
 
 @*<partial name="_EventTimeStatus" model="@Model.Event" />*@
 
 @if (Model.Event.IsBiddingOpen)
 {
-    <h3>Bid Now</h3>
+    <h3>
+        @Model.Product.CurrentBidAmount.ToString("c2")        
+        <small>Current Bid</small>
+    </h3>
     <div class="row">
         <div class="col-md-6">
-            <div class="alert alert-info">
-                Bid must be <strong>@Model.Product.NextMinBidAmount.ToString("c2")</strong> or greater.
-            </div>
 
             <form asp-controller="Bids" asp-action="Create" method="post" class="form-inline">
+                <input type="hidden" name="ProductId" value="@Model.Product.Id" />
+
                 <div class="form-group">
                     <label for="bid-amount" class="sr-only">Bid Amount</label>
                     <div class="input-group">
                         <div class="input-group-addon">$</div>
                         <input type="text" id="bid-amount" name="Amount" class="form-control" placeholder="@Model.Product.NextMinBidAmount" />
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-primary">Place Bid</button>
+                        </span>
                     </div>
                 </div>
 
-                <input type="hidden" name="ProductId" value="@Model.Product.Id" />
-                <button type="submit" class="btn btn-primary">Place Bid</button>
+                <br />
+
+                <span class="text-muted">Bid must be <strong>@Model.Product.NextMinBidAmount.ToString("c2")</strong> or greater.</span>
             </form>
         </div>
     </div>
@@ -56,16 +64,16 @@
     <table class="table table-condensed table-striped">
         <thead>
             <tr>
-                <th>Time</th>
                 <th>Amount</th>
+                <th>Time</th>
                 <th>Bidder</th>
             </tr>
         </thead>
         @foreach (var bid in Model.Bids)
         {
             <tr>
-                <td>@bid.Timestamp.ToString("g")</td>
                 <td>@bid.Amount.ToString("c2")</td>
+                <td>@bid.Timestamp.ToString("g")</td>
                 <td>@bid.UserName</td>
             </tr>
         }
