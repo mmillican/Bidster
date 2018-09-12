@@ -17,12 +17,22 @@
 
 @if (Model.CanUserEdit)
 {
-    <p>
+    <div style="margin-bottom: 10px;">
         <a asp-action="Edit" asp-route-id="@Model.Event.Id" class="btn btn-default">Edit</a>
         <a asp-action="Create" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" class="btn btn-success">New Product</a>
-        <a asp-action="AllBids" asp-route-slug="@Model.Event.Slug" class="btn btn-link">View All Bids</a>
+        
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Reports <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a asp-action="WinningBids" asp-route-slug="@Model.Event.Slug">Winning Bids</a></li>
+                <li><a asp-action="AllBids" asp-route-slug="@Model.Event.Slug">View All Bids</a></li>
+            </ul>
+        </div>
+
         <a asp-action="Index" asp-controller="EventUsers" asp-route-evtSlug="@Model.Event.Slug" class="btn btn-link">Event Users</a>
-    </p>
+    </div>
 }
 
 <partial name="_EventTimeStatus" model="@Model.Event" />

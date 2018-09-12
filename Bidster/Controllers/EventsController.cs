@@ -3,11 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bidster.Data;
 using Bidster.Entities.Events;
-using Bidster.Entities.Products;
 using Bidster.Entities.Users;
 using Bidster.Models;
 using Bidster.Models.Events;
-using Bidster.Models.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -128,6 +126,58 @@ namespace Bidster.Controllers
                     Bids = pbg.Bids.Select(x => x.ToBidModel()).ToList()
                 };
                 model.Products.Add(pgm);
+            }
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpGet("{slug}/winning-bids")]
+        public async Task<IActionResult> WinningBids(string slug)
+        {
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == slug);
+            if (evt == null)
+            {
+                _logger.LogInformation("Event not found for slug '{slug}'", slug);
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!await AuthorizeEventAdmin(evt))
+            {
+                return Unauthorized();
+            }
+
+            var winningBids = await (from bid in _dbContext.Bids
+                                        .Include(x => x.User)
+                                        .Include(x => x.Product)
+                                     where bid.Product.EventId == evt.Id
+                                     group bid by bid.Product into grp
+                                     select new
+                                     {
+                                         Product = grp.Key,
+                                         WinningBid = grp.OrderByDescending(x => x.Amount).FirstOrDefault()
+                                     })
+                                     .AsNoTracking()
+                                     .ToListAsync();
+
+            var model = new WinningBidsReportViewModel
+            {
+                Event = evt.ToEventModel()
+            };
+
+            foreach (var winBid in winningBids)
+            {
+                var bidModel = new WinningBidsReportViewModel.BidRecordModel
+                {
+                    Id = winBid.WinningBid.Id,
+                    ProductId = winBid.Product.Id,
+                    ProductName = winBid.Product.Name,
+                    UserId = winBid.WinningBid.User.Id,
+                    UserName = winBid.WinningBid.User.FullName,
+                    BidTimestamp = winBid.WinningBid.Timestamp,
+                    BidAmount = winBid.WinningBid.Amount
+                };
+                model.WinningBids.Add(bidModel);
             }
 
             return View(model);
