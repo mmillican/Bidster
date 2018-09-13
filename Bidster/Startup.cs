@@ -21,6 +21,7 @@ using Amazon.S3;
 using Bidster.Services.FileStorage;
 using Bidster.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Bidster.Hubs;
 
 namespace Bidster
 {
@@ -57,6 +58,8 @@ namespace Bidster
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSignalR();
 
             // TODO: Can't inject any scoped services into auth handlers, so need to figure out how to get this to work
             //services.AddAuthorization(options =>
@@ -96,6 +99,11 @@ namespace Bidster
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<BidNotificationHub>("/bidNotificationHub");
+            });
 
             app.UseAuthentication();
 

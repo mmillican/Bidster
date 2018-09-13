@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using Bidster.Data;
 using Bidster.Entities.Bids;
 using Bidster.Entities.Users;
+using Bidster.Hubs;
 using Bidster.Models.Bids;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,14 +21,17 @@ namespace Bidster.Controllers
     {
         private readonly BidsterDbContext _dbContext;
         private readonly UserManager<User> _userManager;
+        private readonly IHubContext<BidNotificationHub> __BidNotificationHubContext;
         private readonly ILogger<BidsController> _logger;
 
         public BidsController(BidsterDbContext dbContext,
             UserManager<User> userManager,
+            IHubContext<BidNotificationHub> _bidNotificationHubContext,
             ILogger<BidsController> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            __BidNotificationHubContext = _bidNotificationHubContext;
             _logger = logger;
         }
 
@@ -82,6 +87,8 @@ namespace Bidster.Controllers
                 await _dbContext.SaveChangesAsync();
 
                 AddSuccessNotice("Your bid has been placed!");
+
+                await __BidNotificationHubContext.Clients.All.SendAsync("SendBidNotification", evt, product);
                 
                 return RedirectToProduct(evt.Slug, product.Slug);
             }
