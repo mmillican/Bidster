@@ -6,6 +6,7 @@ using Bidster.Entities.Bids;
 using Bidster.Entities.Users;
 using Bidster.Hubs;
 using Bidster.Models.Bids;
+using Bidster.Services.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,17 +22,17 @@ namespace Bidster.Controllers
     {
         private readonly BidsterDbContext _dbContext;
         private readonly UserManager<User> _userManager;
-        private readonly IHubContext<BidNotificationHub> __BidNotificationHubContext;
+        private readonly IBidService _bidService;
         private readonly ILogger<BidsController> _logger;
 
         public BidsController(BidsterDbContext dbContext,
             UserManager<User> userManager,
-            IHubContext<BidNotificationHub> _bidNotificationHubContext,
+            IBidService bidService,
             ILogger<BidsController> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
-            __BidNotificationHubContext = _bidNotificationHubContext;
+            _bidService = bidService;
             _logger = logger;
         }
 
@@ -52,47 +53,31 @@ namespace Bidster.Controllers
                 return NotFound($"Product ID {model.ProductId} not found");
             }
 
-            if (!evt.IsBiddingOpen(DateTime.Now))
+            var placeBidRequest = new PlaceBidRequest
             {
-                return BadRequest("Bidding is not open");
-            }
-
-            var lastBid = await _dbContext.Bids
-                .Where(x => x.ProductId == product.Id)
-                .OrderByDescending(x => x.Timestamp)
-                .FirstOrDefaultAsync();
-
-            if (model.Amount < product.NextMinBidAmount)
-            {
-                AddErrorNotice($"Bid must be {product.NextMinBidAmount.ToString("c2")} or greater");
-                return RedirectToProduct(evt.Slug, product.Slug);
-            }
+                Event = evt,
+                Product = product,
+                User = user,
+                Amount = model.Amount
+            };
 
             try
             {
-                var bid = new Bid
-                {
-                    Product = product,
-                    User = user,
-                    Timestamp = DateTime.Now,
-                    Amount = model.Amount
-                };
-
-                product.CurrentBidAmount = bid.Amount;
-                product.CurrentHighBidUserId = user.Id;
-                product.BidCount++;
-                _dbContext.Products.Update(product);
-
-                _dbContext.Bids.Add(bid);
-                await _dbContext.SaveChangesAsync();
-
-                AddSuccessNotice("Your bid has been placed!");
-
-                await __BidNotificationHubContext.Clients.All.SendAsync("SendBidNotification", evt, product);
+                var bidResult = await _bidService.PlaceBidAsync(placeBidRequest);
                 
+                if (bidResult.ResultType == PlaceBidResultType.BiddingClosed)
+                {
+                    return BadRequest("Bidding for event is not open");
+                }
+                else if (bidResult.ResultType == PlaceBidResultType.InvalidAmount)
+                {
+                    return BadRequest($"Bid amount must be {product.NextMinBidAmount} or greater");
+                }
+
+                // Success
                 return RedirectToProduct(evt.Slug, product.Slug);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error placing bid for product ID {id} (User: {userId})", model.ProductId, user.Id);
                 return StatusCode(500); // TODO: Return something different

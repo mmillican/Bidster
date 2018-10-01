@@ -22,6 +22,7 @@ using Bidster.Services.FileStorage;
 using Bidster.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Bidster.Hubs;
+using Bidster.Services.Notifications;
 
 namespace Bidster
 {
@@ -71,7 +72,8 @@ namespace Bidster
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
 
-            services.AddSingleton<IEmailSender, EmailSender>();            
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddScoped<IBidService, BidService>();
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
 
             if (Configuration["FileStorage:storageType"].ToLower() == "amazons3")
