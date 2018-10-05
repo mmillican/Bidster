@@ -1,0 +1,13 @@
+﻿@model Bidster.Models.EmailTemplates.OutbidNoticeModel
+
+<p>
+    Hello @Model.UserName,
+</p>
+
+<p>
+    We wanted to let you know that you were just outbid on <b>@Model.ProductName</b> for your event @Model.EventName.
+</p>
+
+<p>
+    The new bid is @Model.NewHighBidAmount.ToString("c2"), but there's still time left. Bidding ends @Model.EventEndDate.ToString("g").
+</p>

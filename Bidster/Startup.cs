@@ -23,6 +23,8 @@ using Bidster.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Bidster.Hubs;
 using Bidster.Services.Notifications;
+using Bidster.Services.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Bidster
 {
@@ -69,10 +71,14 @@ namespace Bidster
             //});
             //services.AddSingleton<IAuthorizationHandler, EventAdminHandler>();
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
 
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddTransient<IViewRenderer, ViewRenderer>();
             services.AddScoped<IBidService, BidService>();
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
 

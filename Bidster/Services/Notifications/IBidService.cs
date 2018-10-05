@@ -6,8 +6,7 @@ namespace Bidster.Services.Notifications
     {
         Task<PlaceBidResult> PlaceBidAsync(PlaceBidRequest bidRequest);
 
-        Task SendOutbidNotice(int eventId, int productId);
 
-        Task SendItemWonNotice(int eventId, int productId);
+        Task SendItemWonNoticeAsync(int eventId, int productId);
     }
 }
