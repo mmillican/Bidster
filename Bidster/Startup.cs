@@ -25,6 +25,7 @@ using Bidster.Hubs;
 using Bidster.Services.Notifications;
 using Bidster.Services.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Bidster
 {
@@ -60,7 +61,11 @@ namespace Bidster
                 opts.LoginPath = "/Identity/Account/Login";
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddLogging(builder => builder
+                .AddConfiguration(Configuration)
+                .AddConsole());
 
             services.AddSignalR();
 
