@@ -8,7 +8,7 @@
 @if (Model.CanUserEdit)
 {
     <p>
-        <a asp-action="Edit" asp-route-evtSlug="@Model.Event.Slug" asp-route-id="@Model.Product.Id" class="btn btn-default">Edit</a>
+        <a asp-action="Edit" asp-route-evtSlug="@Model.Event.Slug" asp-route-id="@Model.Product.Id" class="btn btn-outline-secondary">Edit</a>
     </p>
 }
 
@@ -35,15 +35,17 @@
     <div class="row">
         <div class="col-md-6">
 
-            <form asp-controller="Bids" asp-action="Create" method="post" class="form-inline">
+            <form asp-controller="Bids" asp-action="Create" method="post" class="form-inline mb-4">
                 <input type="hidden" name="ProductId" value="@Model.Product.Id" />
 
                 <div class="form-group">
                     <label for="bid-amount" class="sr-only">Bid Amount</label>
                     <div class="input-group">
-                        <div class="input-group-addon">$</div>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">$</span>
+                        </div>
                         <input type="text" id="bid-amount" name="Amount" class="form-control" placeholder="@Model.Product.NextMinBidAmount" />
-                        <span class="input-group-btn">
+                        <span class="input-group-append">
                             <button type="submit" class="btn btn-primary">Place Bid</button>
                         </span>
                     </div>
