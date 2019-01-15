@@ -152,7 +152,7 @@ namespace Bidster.Controllers
                 _dbContext.Products.Add(product);
                 await _dbContext.SaveChangesAsync();
 
-                // Save image after the product is created because we need the ID
+                // Save images after the product is created because we need the ID
                 if (model.ImageFile != null)
                 {
                     product.ImageFilename = GenerateImageFilename(product, model.ImageFile.FileName);
@@ -162,6 +162,21 @@ namespace Bidster.Controllers
                     using (var stream = model.ImageFile.OpenReadStream())
                     {
                         await _fileService.SaveFileAsync(imagePath, model.ImageFile.ContentType, stream);
+                    }
+
+                    _dbContext.Products.Update(product);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                if (model.ThumbnailFile != null)
+                {
+                    product.ThumbnailFilename = GenerateImageFilename(product, model.ThumbnailFile.FileName, true);
+
+                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ThumbnailFilename);
+
+                    using (var stream = model.ThumbnailFile.OpenReadStream())
+                    {
+                        await _fileService.SaveFileAsync(imagePath, model.ThumbnailFile.ContentType, stream);
                     }
 
                     _dbContext.Products.Update(product);
@@ -217,13 +232,20 @@ namespace Bidster.Controllers
                 MinimumBidAmount = product.MinimumBidAmount,
                 HasBids = product.HasBids,
 
-                ImageFilename  = product.ImageFilename
+                ImageFilename  = product.ImageFilename,
+                ThumbnailFilename = product.ThumbnailFilename
             };
 
             if (!string.IsNullOrEmpty(model.ImageFilename))
             {
                 var path = string.Format(ImagePathFormat, evt.Slug, product.ImageFilename);
                 model.ImageUrl = _fileService.ResolveFileUrl(path);
+            }
+
+            if (!string.IsNullOrEmpty(model.ThumbnailFilename))
+            {
+                var path = string.Format(ImagePathFormat, evt.Slug, product.ThumbnailFilename);
+                model.ThumbnailUrl = _fileService.ResolveFileUrl(path);
             }
 
             return View(model);
@@ -279,6 +301,21 @@ namespace Bidster.Controllers
                     }
                 }
 
+                if (model.ThumbnailFile != null)
+                {
+                    product.ThumbnailFilename = GenerateImageFilename(product, model.ThumbnailFile.FileName, true);
+
+                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ThumbnailFilename);
+
+                    using (var stream = model.ThumbnailFile.OpenReadStream())
+                    {
+                        await _fileService.SaveFileAsync(imagePath, model.ThumbnailFile.ContentType, stream);
+                    }
+
+                    _dbContext.Products.Update(product);
+                    await _dbContext.SaveChangesAsync();
+                }
+
                 _dbContext.Products.Update(product);
                 await _dbContext.SaveChangesAsync();
 
@@ -315,7 +352,7 @@ namespace Bidster.Controllers
         private async Task<bool> DoesSlugExist(int eventId, string slug) =>
             await _dbContext.Products.AnyAsync(x => x.EventId == eventId && x.Slug == slug);
 
-        private static string GenerateImageFilename(Product product, string origFilename)
+        private static string GenerateImageFilename(Product product, string origFilename, bool isThumb = false)
         {
             if (product == null)
             {
@@ -330,6 +367,11 @@ namespace Bidster.Controllers
 
             var sluggedProductName = product.Slug.Truncate(90);
             var filename = $"{product.Id}-{sluggedProductName}{fileExt}";
+
+            if (isThumb)
+            {
+                filename = $"t-{filename}";
+            }
 
             return filename;
         }

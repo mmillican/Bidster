@@ -37,7 +37,8 @@ namespace Bidster.Models
             CurrentHighBidUserId = product.CurrentHighBidUserId,
             BidCount = product.BidCount,
             NextMinBidAmount = product.NextMinBidAmount,
-            ImageFilename = product.ImageFilename
+            ImageFilename = product.ImageFilename,
+            ThumbnailFilename = product.ThumbnailFilename
         };
 
         public static BidModel ToBidModel(this Bid bid) => new BidModel

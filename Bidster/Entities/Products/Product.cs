@@ -32,5 +32,7 @@ namespace Bidster.Entities.Products
 
         [MaxLength(100)]
         public string ImageFilename { get; set; }
+        [MaxLength(100)]
+        public string ThumbnailFilename { get; set; }
     }
 }

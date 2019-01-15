@@ -27,5 +27,8 @@ namespace Bidster.Models.Products
 
         public string ImageFilename { get; set; }
         public string ImageUrl { get; set; }
+
+        public string ThumbnailFilename { get; set; }
+        public string ThumbnailUrl { get; set; }
     }
 }

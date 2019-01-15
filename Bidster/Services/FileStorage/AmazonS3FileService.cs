@@ -31,7 +31,7 @@ namespace Bidster.Services.FileStorage
                 path = path.Substring(1);
             }
 
-            return $"http://s3.amazonaws.com/{_fileStoreConfig.S3Config.BucketName}/{path}";
+            return $"https://s3.amazonaws.com/{_fileStoreConfig.S3Config.BucketName}/{path}";
         }
 
         public async Task SaveFileAsync(string path, string contentType, Stream stream)

@@ -25,5 +25,9 @@ namespace Bidster.Models.Products
         public IFormFile ImageFile { get; set; }
         public string ImageFilename { get; set; }
         public string ImageUrl { get; set; }
+
+        public IFormFile ThumbnailFile { get; set; }
+        public string ThumbnailFilename { get; set; }
+        public string ThumbnailUrl { get; set; }
     }
 }
