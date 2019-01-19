@@ -5,7 +5,7 @@
 }
 
 @section Jumbotron
-{
+    {
     <div class="jumbotron">
         <div class="container">
             <h1>@Model.Event.Name</h1>
@@ -15,29 +15,38 @@
     </div>
 }
 
+<partial name="_EventTimeStatus" model="@Model.Event" />
+
 @if (Model.CanUserEdit)
 {
-    <div class="mb-2">
-        <a asp-action="Edit" asp-route-id="@Model.Event.Id" class="btn btn-outline-secondary">Edit</a>
-        <a asp-action="Create" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" class="btn btn-success">New Product</a>
-        
+    <div class="my-4">
         <div class="btn-group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Reports <span class="caret"></span>
-            </button>
-            <div class="dropdown-menu">
-                <a asp-action="WinningBids" asp-route-slug="@Model.Event.Slug" class="dropdown-item">Winning Bids</a>
-                <a asp-action="AllBids" asp-route-slug="@Model.Event.Slug" class="dropdown-item">View All Bids</a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Manage <span class="caret"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <a asp-action="Edit" asp-route-id="@Model.Event.Id" class="dropdown-item">Edit Event</a>
+                    <a asp-action="Create" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" class="dropdown-item">Add New Product</a>
+                    <a asp-action="Index" asp-controller="EventUsers" asp-route-evtSlug="@Model.Event.Slug" class="dropdown-item">Manage Event Users</a>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Reports <span class="caret"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <a asp-action="WinningBids" asp-route-slug="@Model.Event.Slug" class="dropdown-item">Winning Bids</a>
+                    <a asp-action="AllBids" asp-route-slug="@Model.Event.Slug" class="dropdown-item">View All Bids</a>
+                </div>
             </div>
         </div>
 
-        <a asp-action="Index" asp-controller="EventUsers" asp-route-evtSlug="@Model.Event.Slug" class="btn btn-link">Event Users</a>
     </div>
 }
 
-<partial name="_EventTimeStatus" model="@Model.Event" />
-
-<h3>Items for Sale</h3>
+<h2>Items for Sale</h2>
 
 <div class="row products">
     @foreach (var product in Model.Products)
