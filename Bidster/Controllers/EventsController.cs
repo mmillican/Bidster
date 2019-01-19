@@ -184,10 +184,19 @@ namespace Bidster.Controllers
                     Id = winBid.WinningBid.Id,
                     ProductId = winBid.Product.Id,
                     ProductName = winBid.Product.Name,
-                    UserId = winBid.WinningBid.User.Id,
-                    UserName = winBid.WinningBid.User.FullName,
                     BidTimestamp = winBid.WinningBid.Timestamp,
-                    BidAmount = winBid.WinningBid.Amount
+                    BidAmount = winBid.WinningBid.Amount,
+                    Winner = new WinningBidsReportViewModel.BidRecordModel.UserModel
+                    {
+                        Id = winBid.WinningBid.User.Id,
+                        FullName = winBid.WinningBid.User.FullName,
+                        Address = winBid.WinningBid.User.Address,
+                        Address2 = winBid.WinningBid.User.Address2,
+                        City = winBid.WinningBid.User.City,
+                        State = winBid.WinningBid.User.State,
+                        PostalCode = winBid.WinningBid.User.PostalCode,
+                        PhoneNumber = winBid.WinningBid.User.PhoneNumber
+                    }
                 };
                 model.WinningBids.Add(bidModel);
             }

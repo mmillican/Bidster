@@ -12,9 +12,9 @@
     <thead>
         <tr>
             <th>Product</th>
-            <th>Bid time</th>
-            <th>Amount</th>
-            <th>Bidder</th>
+            <th>Winner</th>
+            <th>Winning Amount</th>
+            <th>Time</th>
         </tr>
     </thead>
     @foreach(var bid in Model.WinningBids)
@@ -23,9 +23,33 @@
             <td>
                 <strong>@bid.ProductName</strong>
             </td>
-            <td>@bid.BidTimestamp.ToString("g")</td>
+            <td>
+                <strong>@bid.Winner.FullName</strong><br />
+                @if (!string.IsNullOrEmpty(bid.Winner.Address))
+                {
+                    @bid.Winner.Address<br />
+                    @if (!string.IsNullOrEmpty(bid.Winner.Address2))
+                    {
+                        @bid.Winner.Address2<br />
+                    }
+                    @($"{bid.Winner.City}, {bid.Winner.State} {bid.Winner.PostalCode}")<br />
+                }
+                else
+                {
+                    <i>No address provided</i><br />
+                }
+
+                @if (!string.IsNullOrEmpty(bid.Winner.PhoneNumber))
+                {
+                    @bid.Winner.PhoneNumber
+                }
+                else
+                {
+                    <i>No phone number provided</i>
+                }
+            </td>
             <td>@bid.BidAmount.ToString("c2")</td>
-            <td>@bid.UserName</td>
+            <td>@bid.BidTimestamp.ToString("g")</td>
         </tr>
     }
 </table>
