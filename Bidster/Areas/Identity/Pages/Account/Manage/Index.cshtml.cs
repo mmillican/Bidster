@@ -53,6 +53,17 @@ namespace Bidster.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [MaxLength(50)]
+            public string Address { get; set; }
+            [MaxLength(50)]
+            public string Address2 { get; set; }
+            [MaxLength(50)]
+            public string City { get; set; }
+            [MaxLength(5)]
+            public string State { get; set; }
+            [MaxLength(15)]
+            public string PostalCode { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -74,7 +85,12 @@ namespace Bidster.Areas.Identity.Pages.Account.Manage
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = email,
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Address = user.Address,
+                Address2 = user.Address2,
+                City = user.City,
+                State = user.State,
+                PostalCode = user.PostalCode
             };
 
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
@@ -97,6 +113,12 @@ namespace Bidster.Areas.Identity.Pages.Account.Manage
 
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
+
+            user.Address = Input.Address;
+            user.Address2 = Input.Address2;
+            user.City = Input.City;
+            user.State = Input.State;
+            user.PostalCode = Input.PostalCode;
 
             await _userManager.UpdateAsync(user);
 

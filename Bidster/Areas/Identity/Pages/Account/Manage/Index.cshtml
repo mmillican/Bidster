@@ -4,12 +4,12 @@
     ViewData["Title"] = "Profile";
 }
 
-<h4>@ViewData["Title"]</h4>
 @Html.Partial("_StatusMessage", Model.StatusMessage)
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
+
+<form id="profile-form" method="post">
+    <div class="row">
+        <div class="col-md-6">
+            @*<div asp-validation-summary="All" class="text-danger"></div>*@
             <div class="form-group">
                 <label asp-for="Input.FirstName"></label>
                 <input asp-for="Input.FirstName" class="form-control" />
@@ -18,7 +18,7 @@
                 <label asp-for="Input.LastName"></label>
                 <input asp-for="Input.LastName" class="form-control" />
             </div>
-            
+
             <div class="form-group">
                 <label asp-for="Username"></label>
                 <input asp-for="Username" class="form-control" disabled />
@@ -44,10 +44,41 @@
                 <input asp-for="Input.PhoneNumber" class="form-control" />
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Save</button>
-        </form>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Input.Address">Address</label>
+                <input type="text" asp-for="Input.Address" class="form-control" placeholder="1234 Main St">
+                <span asp-validation-for="Input.Address" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address2">Address 2</label>
+                <input type="text" asp-for="Input.Address2" class="form-control" placeholder="Apartment, studio, or floor">
+                <span asp-validation-for="Input.Address2" class="text-danger"></span>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Input.City">City</label>
+                    <input type="text" asp-for="Input.City" class="form-control">
+                    <span asp-validation-for="Input.City" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-3">
+                    <label asp-for="Input.State">State</label>
+                    <input type="text" asp-for="Input.State" class="form-control">
+                    <span asp-validation-for="Input.State" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-3">
+                    <label asp-for="Input.PostalCode">Zip Code</label>
+                    <input type="text" asp-for="Input.PostalCode" class="form-control">
+                    <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

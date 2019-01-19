@@ -14,6 +14,17 @@ namespace Bidster.Entities.Users
 
         public string FullName => $"{FirstName} {LastName}";
 
+        [MaxLength(50)]
+        public string Address { get; set; }
+        [MaxLength(50)]
+        public string Address2 { get; set; }
+        [MaxLength(50)]
+        public string City { get; set; }
+        [MaxLength(5)]
+        public string State { get; set; }
+        [MaxLength(15)]
+        public string PostalCode { get; set; }
+
         /// <summary>
         /// Navigation property for the roles this user belongs to.
         /// </summary>
