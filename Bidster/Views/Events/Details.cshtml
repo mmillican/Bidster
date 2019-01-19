@@ -37,33 +37,42 @@
 
 <partial name="_EventTimeStatus" model="@Model.Event" />
 
-<h3>Items</h3>
+<h3>Items for Sale</h3>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Current Price</th>
-            <th>Bid Count</th>
-            <th>Min Bid Amount</th>
-            <td></td>
-        </tr>
-    </thead>
+<div class="row products">
     @foreach (var product in Model.Products)
     {
-        <tr>
-            <td>
-                <a asp-action="Details" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" asp-route-slug="@product.Slug">@product.Name</a>
-            </td>
-            <td>@product.CurrentBidAmount.ToString("c2")</td>
-            <td>@product.BidCount</td>
-            <td>@product.MinimumBidAmount.ToString("c2")</td>
-            <td>
-                @if (Model.CanUserEdit)
-                {
-                    <a asp-action="Edit" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" asp-route-id="@product.Id">Edit</a>
-                }
-            </td>
-        </tr>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <a asp-action="Details" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" asp-route-slug="@product.Slug">
+                    @if (!string.IsNullOrEmpty(product.ThumbnailUrl))
+                    {
+                        <img class="card-img-top" width="100%" height="225" src="@product.ThumbnailUrl" alt="@product.Name" />
+                    }
+                    else
+                    {
+                        <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect fill="#55595c" width="100%" height="100%" /><text fill="#eceeef" dy=".3em" x="50%" y="50%">Thumbnail</text></svg>
+                    }
+                </a>
+                <div class="card-body">
+                    <h5 class="card-heading">
+                        <a asp-action="Details" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" asp-route-slug="@product.Slug">@product.Name</a>
+                    </h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>
+                            <b>@product.CurrentBidAmount.ToString("c2")</b>
+                            <small>(@product.BidCount bids)</small>
+                        </span>
+                        <div class="btn-group">
+                            @*<button type="button" class="btn btn-sm btn-outline-secondary">View</button>*@
+                            @if (Model.CanUserEdit)
+                            {
+                                <a asp-action="Edit" asp-controller="Products" asp-route-evtSlug="@Model.Event.Slug" asp-route-id="@product.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
-</table>
+</div>

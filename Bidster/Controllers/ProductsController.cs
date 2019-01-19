@@ -20,9 +20,6 @@ namespace Bidster.Controllers
     [Route("events/{evtSlug}/products")]
     public class ProductsController : Controller
     {
-        // 0 = event slug --- 1 == filename
-        private const string ImagePathFormat = "events/{0}/products/{1}";
-
         private readonly BidsterDbContext _dbContext;
         private readonly UserManager<User> _userManager;
         private readonly IFileService _fileService;
@@ -64,7 +61,7 @@ namespace Bidster.Controllers
             
             if (!string.IsNullOrEmpty(product.ImageFilename))
             {
-                model.Product.ImageUrl = _fileService.ResolveFileUrl(string.Format(ImagePathFormat, evt.Slug, product.ImageFilename));
+                model.Product.ImageUrl = _fileService.ResolveFileUrl(string.Format(Constants.ImagePathFormat, evt.Slug, product.ImageFilename));
             }
 
             model.CanUserEdit = await AuthorizeEventAdmin(evt);
@@ -157,7 +154,7 @@ namespace Bidster.Controllers
                 {
                     product.ImageFilename = GenerateImageFilename(product, model.ImageFile.FileName);
 
-                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ImageFilename);
+                    var imagePath = string.Format(Constants.ImagePathFormat, evt.Slug, product.ImageFilename);
 
                     using (var stream = model.ImageFile.OpenReadStream())
                     {
@@ -172,7 +169,7 @@ namespace Bidster.Controllers
                 {
                     product.ThumbnailFilename = GenerateImageFilename(product, model.ThumbnailFile.FileName, true);
 
-                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ThumbnailFilename);
+                    var imagePath = string.Format(Constants.ImagePathFormat, evt.Slug, product.ThumbnailFilename);
 
                     using (var stream = model.ThumbnailFile.OpenReadStream())
                     {
@@ -238,13 +235,13 @@ namespace Bidster.Controllers
 
             if (!string.IsNullOrEmpty(model.ImageFilename))
             {
-                var path = string.Format(ImagePathFormat, evt.Slug, product.ImageFilename);
+                var path = string.Format(Constants.ImagePathFormat, evt.Slug, product.ImageFilename);
                 model.ImageUrl = _fileService.ResolveFileUrl(path);
             }
 
             if (!string.IsNullOrEmpty(model.ThumbnailFilename))
             {
-                var path = string.Format(ImagePathFormat, evt.Slug, product.ThumbnailFilename);
+                var path = string.Format(Constants.ImagePathFormat, evt.Slug, product.ThumbnailFilename);
                 model.ThumbnailUrl = _fileService.ResolveFileUrl(path);
             }
 
@@ -293,7 +290,7 @@ namespace Bidster.Controllers
                 {
                     product.ImageFilename = GenerateImageFilename(product, model.ImageFile.FileName);
 
-                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ImageFilename);
+                    var imagePath = string.Format(Constants.ImagePathFormat, evt.Slug, product.ImageFilename);
 
                     using (var stream = model.ImageFile.OpenReadStream())
                     {
@@ -305,7 +302,7 @@ namespace Bidster.Controllers
                 {
                     product.ThumbnailFilename = GenerateImageFilename(product, model.ThumbnailFile.FileName, true);
 
-                    var imagePath = string.Format(ImagePathFormat, evt.Slug, product.ThumbnailFilename);
+                    var imagePath = string.Format(Constants.ImagePathFormat, evt.Slug, product.ThumbnailFilename);
 
                     using (var stream = model.ThumbnailFile.OpenReadStream())
                     {

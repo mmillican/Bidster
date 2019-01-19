@@ -6,6 +6,7 @@ using Bidster.Entities.Events;
 using Bidster.Entities.Users;
 using Bidster.Models;
 using Bidster.Models.Events;
+using Bidster.Services.FileStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,16 +21,19 @@ namespace Bidster.Controllers
         private readonly BidsterDbContext _dbContext;
         private readonly UserManager<User> _userManager;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IFileService _fileService;
         private readonly ILogger<EventsController> _logger;
 
         public EventsController(BidsterDbContext dbContext,
             UserManager<User> userManager,
             IAuthorizationService authorizationService,
+            IFileService fileService,
             ILogger<EventsController> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _authorizationService = authorizationService;
+            _fileService = fileService;
             this._logger = logger;
         }
 
@@ -69,6 +73,14 @@ namespace Bidster.Controllers
             model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)
                 .Select(x => ModelMapper.ToProductModel(x))
                 .ToListAsync();
+
+            foreach (var product in model.Products)
+            {
+                if (!string.IsNullOrEmpty(product.ThumbnailFilename))
+                {
+                    product.ThumbnailUrl = _fileService.ResolveFileUrl(string.Format(Constants.ImagePathFormat, evt.Slug, product.ThumbnailFilename));
+                }
+            }
 
             return View(model);
         }
