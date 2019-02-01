@@ -5,6 +5,7 @@ using Bidster.Data;
 using Bidster.Entities.Bids;
 using Bidster.Entities.Users;
 using Bidster.Hubs;
+using Bidster.Models;
 using Bidster.Models.Bids;
 using Bidster.Services.Notifications;
 using Microsoft.AspNetCore.Authorization;
@@ -36,15 +37,40 @@ namespace Bidster.Controllers
             _logger = logger;
         }
 
+        [HttpGet("")]
+        public async Task<IActionResult> GetItemBids(int productId)
+        {
+            var bids = await _dbContext.Bids
+                .Include(x => x.User)
+                .Where(x => x.ProductId == productId)
+                .OrderByDescending(x => x.Timestamp)
+                .Select(x => x.ToBidModel())
+                .ToListAsync();
+
+            return Ok(bids);
+        }
+
         [HttpPost("")]
-        public async Task<IActionResult> Create(BidModel model)
+        public async Task<IActionResult> Create([FromBody] BidModel model)
         {
             // TODO: Validations
             // - Make sure user can bid
             // - Make sure last bid wasn't current user
 
             var product = await _dbContext.Products.FindAsync(model.ProductId);
+            if (product == null)
+            {
+                _logger.LogInformation("Product {productId} not found", model.ProductId);
+                return NotFound();
+            }
+
             var evt = await _dbContext.Events.FindAsync(product.EventId);
+            if (evt == null)
+            {
+                _logger.LogInformation("Event {eventId} not found", product.EventId);
+                return NotFound();
+            }
+
             var user = await _userManager.GetUserAsync(User);
 
             if (product == null)
@@ -75,7 +101,7 @@ namespace Bidster.Controllers
                 }
 
                 // Success
-                return RedirectToProduct(evt.Slug, product.Slug);
+                return Created("", model);
             }
             catch (Exception ex)
             {

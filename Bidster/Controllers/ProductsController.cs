@@ -66,12 +66,6 @@ namespace Bidster.Controllers
 
             model.CanUserEdit = await AuthorizeEventAdmin(evt);
 
-            model.Bids = await _dbContext.Bids
-                .Include(x => x.User)
-                .Where(x => x.ProductId == product.Id)
-                .OrderByDescending(x => x.Timestamp)
-                .Select(x => x.ToBidModel())
-                .ToListAsync();
 
             return View(model);
         }
