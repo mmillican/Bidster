@@ -209,6 +209,7 @@ namespace Bidster.Controllers
         public IActionResult Create()
         {
             var model = new EditEventViewModel();
+            model.DisplayOn = DateTime.Now;
 
             return View(model);
         }
@@ -229,8 +230,10 @@ namespace Bidster.Controllers
                 var evt = new Event
                 {
                     Name = model.Name,
+                    Description = model.Description,
                     StartOn = model.StartOn,
                     EndOn = model.EndOn,
+                    DisplayOn = model.DisplayOn,
                     HideBidderNames = model.HideBidderNames,
                     Owner = user,
                     CreatedOn = DateTime.UtcNow
@@ -271,8 +274,10 @@ namespace Bidster.Controllers
             {
                 Id = evt.Id,
                 Name = evt.Name,
+                Description = evt.Description,
                 StartOn = evt.StartOn,
                 EndOn = evt.EndOn,
+                DisplayOn = evt.DisplayOn,
                 HideBidderNames = evt.HideBidderNames
             };
 
@@ -304,8 +309,10 @@ namespace Bidster.Controllers
             try
             {
                 evt.Name = model.Name;
+                evt.Description = model.Description;
                 evt.StartOn = model.StartOn;
                 evt.EndOn = model.EndOn;
+                evt.DisplayOn = model.DisplayOn;
                 evt.HideBidderNames = model.HideBidderNames;
 
                 _dbContext.Events.Update(evt);

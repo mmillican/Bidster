@@ -12,6 +12,7 @@
     <thead>
         <tr>
             <th>Name</th>
+            <th>Display On</th>
             <th>Start</th>
             <th>End</th>
         </tr>
@@ -22,6 +23,7 @@
             <td>
                 <a asp-action="Details" asp-route-slug="@evt.Slug">@evt.Name</a>
             </td>
+            <td>@evt.DisplayOn.ToString("d")</td>
             <td>@evt.StartOn.ToString("d")</td>
             <td>@evt.EndOn.ToString("d")</td>
         </tr>

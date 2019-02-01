@@ -4,14 +4,16 @@ using Bidster.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Bidster.Migrations
 {
     [DbContext(typeof(BidsterDbContext))]
-    partial class BidsterDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190201051347_EventDescriptionAndDisplayDate")]
+    partial class EventDescriptionAndDisplayDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
