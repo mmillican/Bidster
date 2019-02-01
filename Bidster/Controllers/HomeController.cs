@@ -5,28 +5,31 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Bidster.Models;
+using Bidster.Data;
+using Bidster.Models.Home;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bidster.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly BidsterDbContext _dbContext;
+
+        public HomeController(BidsterDbContext dbContext)
         {
-            return View();
+            _dbContext = dbContext;
         }
 
-        public IActionResult About()
+        public async Task<IActionResult> Index()
         {
-            ViewData["Message"] = "Your application description page.";
+            var model = new HomeViewModel();
+            model.Events = await _dbContext.Events
+                .Where(x => x.DisplayOn <= DateTime.Now 
+                    && x.EndOn >= DateTime.Now)
+                .Select(x => ModelMapper.ToEventModel(x))
+                .ToListAsync();
 
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
+            return View(model);
         }
 
         public IActionResult Privacy()
