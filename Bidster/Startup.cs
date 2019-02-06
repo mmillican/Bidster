@@ -26,6 +26,7 @@ using Bidster.Services.Notifications;
 using Bidster.Services.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
+using Amazon.SimpleEmail;
 
 namespace Bidster
 {
@@ -79,20 +80,24 @@ namespace Bidster
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
+            services.Configure<EmailConfig>(Configuration.GetSection("Email"));
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
 
-            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IEmailSender, AmazonSesEmailSender>();
             services.AddTransient<IViewRenderer, ViewRenderer>();
             services.AddScoped<IBidService, BidService>();
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
 
+            services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
+
             if (Configuration["FileStorage:storageType"].ToLower() == "amazons3")
             {
-                services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
                 services.AddAWSService<IAmazonS3>();
                 services.AddTransient<IFileService, AmazonS3FileService>();
             }
+
+            services.AddAWSService<IAmazonSimpleEmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
