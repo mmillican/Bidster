@@ -25,6 +25,38 @@
 
 <hr />
 
+@if (Model.UserBids.Any())
+{
+    <h3>My Bidding Activity</h3>
+
+    <table class="table table-sm table-striped">
+        <tr>
+            <th>Item / Event</th>
+            <th>Amount</th>
+        </tr>
+        @foreach(var bid in Model.UserBids)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-controller="Products" asp-route-evtSlug="@bid.EventSlug" asp-route-slug="@bid.ProductSlug">
+                        @bid.ProductName
+                    </a>
+                    <br /><small>@bid.EventName</small>
+                </td>
+                <td class="@(bid.IsWinning ? "text-success" : "text-danger")">
+                    @bid.CurrentBidAmount.ToString("c2")
+                </td>
+            </tr>
+        }
+        <caption>
+            <ul class="list-inline">
+                <li class="list-inline-item text-success">Winning</li>
+                <li class="list-inline-item text-danger">Not winning</li>
+            </ul>
+        </caption>
+    </table>
+}
+
 <h3>Current &amp; Upcoming Events</h3>
 
 @if (Model.Events.Any())
