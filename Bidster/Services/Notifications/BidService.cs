@@ -6,9 +6,11 @@ using Bidster.Entities.Bids;
 using Bidster.Entities.Events;
 using Bidster.Entities.Products;
 using Bidster.Entities.Users;
+using Bidster.Hubs;
 using Bidster.Models.EmailTemplates;
 using Bidster.Services.Mvc;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,16 +21,19 @@ namespace Bidster.Services.Notifications
         private readonly BidsterDbContext _dbContext;
         private readonly IViewRenderer _viewRenderer;
         private readonly IEmailSender _emailSender;
+        private readonly IHubContext<BidsterHub> _hubContext;
         private readonly ILogger<BidService> _logger;
 
         public BidService(BidsterDbContext dbContext,
             IViewRenderer viewRenderer,
             IEmailSender emailSender,
+            IHubContext<BidsterHub> hubContext,
             ILogger<BidService> logger)
         {
             _dbContext = dbContext;
             _viewRenderer = viewRenderer;
             _emailSender = emailSender;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -73,7 +78,7 @@ namespace Bidster.Services.Notifications
                 result.ResultType = PlaceBidResultType.Success;
                 result.BidId = bid.Id;
 
-                //await __BidNotificationHubContext.Clients.All.SendAsync("SendBidNotification", evt, product);
+                await _hubContext.Clients.All.SendAsync("BidPlaced", bidRequest.Product.Name, bidRequest.Amount);
 
                 if (previousBid != null)
                 {

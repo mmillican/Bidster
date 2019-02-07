@@ -120,7 +120,7 @@ namespace Bidster
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<BidNotificationHub>("/bidNotificationHub");
+                routes.MapHub<BidsterHub>("/bidster");
             });
 
             app.UseAuthentication();
