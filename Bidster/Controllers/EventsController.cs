@@ -235,6 +235,7 @@ namespace Bidster.Controllers
                     EndOn = model.EndOn,
                     DisplayOn = model.DisplayOn,
                     HideBidderNames = model.HideBidderNames,
+                    DefaultMinimumBidAmount = model.DefaultMinimumBidAmount,
                     Owner = user,
                     CreatedOn = DateTime.UtcNow
                 };
@@ -278,7 +279,8 @@ namespace Bidster.Controllers
                 StartOn = evt.StartOn,
                 EndOn = evt.EndOn,
                 DisplayOn = evt.DisplayOn,
-                HideBidderNames = evt.HideBidderNames
+                HideBidderNames = evt.HideBidderNames,
+                DefaultMinimumBidAmount = evt.DefaultMinimumBidAmount,
             };
 
             return View(model);
@@ -314,6 +316,7 @@ namespace Bidster.Controllers
                 evt.EndOn = model.EndOn;
                 evt.DisplayOn = model.DisplayOn;
                 evt.HideBidderNames = model.HideBidderNames;
+                evt.DefaultMinimumBidAmount = model.DefaultMinimumBidAmount;
 
                 _dbContext.Events.Update(evt);
                 await _dbContext.SaveChangesAsync();

@@ -95,6 +95,11 @@ namespace Bidster.Controllers
                 EventName = evt.Name
             };
 
+            if (evt.DefaultMinimumBidAmount.HasValue)
+            {
+                model.MinimumBidAmount = evt.DefaultMinimumBidAmount.Value;
+            }
+
             return View(model);
         }
 

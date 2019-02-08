@@ -17,5 +17,6 @@ namespace Bidster.Models.Events
         public DateTime DisplayOn { get; set; }
 
         public bool HideBidderNames { get; set; }
+        public decimal? DefaultMinimumBidAmount { get; set; }
     }
 }

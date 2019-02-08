@@ -24,6 +24,8 @@ namespace Bidster.Entities.Events
 
         public bool HideBidderNames { get; set; }
 
+        public decimal? DefaultMinimumBidAmount { get; set; }
+
         public int OwnerId { get; set; }
         [ForeignKey(nameof(OwnerId))]
         public virtual User Owner { get; set; }
