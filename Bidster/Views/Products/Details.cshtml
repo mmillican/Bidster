@@ -19,7 +19,7 @@
         <img src="@Model.Product.ImageUrl" class="float-right ml-4 img-thumbnail" width="400" />
     }
 
-    @Model.Product.Description
+    @Html.Raw(Model.Product.Description)
 
     <hr />
 </p>

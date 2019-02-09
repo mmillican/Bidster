@@ -1,0 +1,61 @@
+﻿@model Bidster.Models.Products.EditProductViewModel
+
+<div class="form-group">
+    <label asp-for="Name"></label>
+    <input type="text" asp-for="Name" class="form-control" />
+</div>
+<div class="form-group">
+    <label asp-for="Description"></label>
+    <kendo-editor for="Description" deferred="true" encoded="false">
+        <tools>
+            <tool name="formatting" />
+            <tool name="bold" />
+            <tool name="italic" />
+            <tool name="underline" />
+            <tool name="insertUnorderedList" />
+            <tool name="insertOrderedList" />
+            <tool name="indent" />
+            <tool name="outdent" />
+            <tool name="createLink" />
+            <tool name="unlink" />
+        </tools>
+    </kendo-editor>
+</div>
+<div class="form-group">
+    <label asp-for="StartingPrice"></label>
+    <input type="text" asp-for="StartingPrice" class="form-control" />
+</div>
+<div class="form-group">
+    <label asp-for="MinimumBidAmount"></label>
+    <input type="text" asp-for="MinimumBidAmount" class="form-control" />
+</div>
+
+<div class="form-group mb-2 clearfix">
+    <div class="custom-file">
+        <input type="file" asp-for="ImageFile" class="custom-file-input" />
+        <label asp-for="ImageFile" class="custom-file-label">Image</label>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <a href="@Model.ImageUrl" target="_blank">
+            <img src="@Model.ImageUrl" class="float-right img-thumbnail" width="150" />
+        </a>
+    }
+
+    <input type="hidden" asp-for="ImageUrl" />
+</div>
+
+<div class="form-group mb-2 clearfix">
+    <div class="custom-file">
+        <input type="file" asp-for="ThumbnailFile" class="custom-file-input" />
+        <label asp-for="ThumbnailFile" class="custom-file-label">Thumbnail / Small Image</label>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+    {
+        <a href="@Model.ThumbnailUrl" target="_blank">
+            <img src="@Model.ThumbnailUrl" class="float-right img-thumbnail" width="150" />
+        </a>
+    }
+
+    <input type="hidden" asp-for="ThumbnailUrl" />
+</div>
