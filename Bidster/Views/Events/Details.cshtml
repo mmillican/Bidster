@@ -12,7 +12,7 @@
 @if (!string.IsNullOrEmpty(Model.Event.Description))
 {
     <p class="description">
-        @Model.Event.Description
+        @Html.Raw(System.Web.HttpUtility.HtmlDecode(Model.Event.Description))
     </p>
 }
 

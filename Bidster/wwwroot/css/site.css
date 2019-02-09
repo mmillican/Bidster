@@ -26,3 +26,8 @@
         display: none;
     }
 }
+
+.k-widget.form-control {
+    display: block;
+    width: 100%;
+}

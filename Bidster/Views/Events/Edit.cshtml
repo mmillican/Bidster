@@ -7,39 +7,8 @@
 <div class="row">
     <div class="col-md-6">
         <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-            <div class="form-group">
-                <label asp-for="Name"></label>
-                <input type="text" asp-for="Name" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label asp-for="Description"></label>
-                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-            </div>
-            <div class="form-group">
-                <label asp-for="StartOn"></label>
-                <input type="date" asp-for="StartOn" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label asp-for="EndOn"></label>
-                <input type="date" asp-for="EndOn" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label asp-for="DisplayOn"></label>
-                <input type="date" asp-for="DisplayOn" class="form-control" />
-                <span class="text-muted">Enter the date on which you would like this event to appear on the site.</span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DefaultMinimumBidAmount"></label>
-                <input type="text" asp-for="DefaultMinimumBidAmount" class="form-control" />
-                <span class="text-muted">If set, new items for this event will use this as the min. bid amount. Value can be changed per item.</span>
-            </div>
-            <div class="checkbox">
-                <label asp-for="HideBidderNames">
-                    <input asp-for="HideBidderNames" />
-                    Hide bidder names
-                    <span class="text-muted">(Names are still visible to event admins)</span>
-                </label>
-            </div>
+            
+            <partial name="_EditForm" model="Model" />
 
             <button type="submit" class="btn btn-primary">Save Event</button>
         </form>

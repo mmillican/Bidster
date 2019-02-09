@@ -68,6 +68,7 @@ namespace Bidster
                 .AddConfiguration(Configuration)
                 .AddConsole());
 
+            services.AddKendo();
             services.AddSignalR();
 
             // TODO: Can't inject any scoped services into auth handlers, so need to figure out how to get this to work
