@@ -73,6 +73,26 @@ namespace Bidster.Areas.Identity.Pages.Account
             [Required]
             [Display(Name = "Last name")]
             public string LastName { get; set; }
+
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
+
+            [MaxLength(50)]
+            [Display(Name = "Address")]
+            public string Address { get; set; }
+            [MaxLength(50)]
+            [Display(Name = "Address (line 2)")]
+            public string Address2 { get; set; }
+            [MaxLength(50)]
+            [Display(Name = "City")]
+            public string City { get; set; }
+            [MaxLength(5)]
+            [Display(Name = "State")]
+            public string State { get; set; }
+            [MaxLength(15)]
+            [Display(Name = "Zip Code")]
+            public string PostalCode { get; set; }
         }
 
         public void OnGet(string returnUrl = null)
@@ -90,7 +110,13 @@ namespace Bidster.Areas.Identity.Pages.Account
                     UserName = Input.Email, 
                     Email = Input.Email,
                     FirstName = Input.FirstName,
-                    LastName = Input.LastName
+                    LastName = Input.LastName,
+                    Address = Input.Address,
+                    Address2 = Input.Address2,
+                    City = Input.City,
+                    State = Input.State,
+                    PostalCode = Input.PostalCode,
+                    PhoneNumber = Input.PhoneNumber
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)

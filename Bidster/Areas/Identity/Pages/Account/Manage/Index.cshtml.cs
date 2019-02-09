@@ -40,10 +40,12 @@ namespace Bidster.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
-            [Required, MaxLength(50)]
+            [Required]
+            [Display(Name = "First name")]
             public string FirstName { get; set; }
 
-            [Required, MaxLength(50)]
+            [Required]
+            [Display(Name = "Last name")]
             public string LastName { get; set; }
 
             [Required]
@@ -55,14 +57,19 @@ namespace Bidster.Areas.Identity.Pages.Account.Manage
             public string PhoneNumber { get; set; }
 
             [MaxLength(50)]
+            [Display(Name = "Address")]
             public string Address { get; set; }
             [MaxLength(50)]
+            [Display(Name = "Address (line 2)")]
             public string Address2 { get; set; }
             [MaxLength(50)]
+            [Display(Name = "City")]
             public string City { get; set; }
             [MaxLength(5)]
+            [Display(Name = "State")]
             public string State { get; set; }
             [MaxLength(15)]
+            [Display(Name = "Zip Code")]
             public string PostalCode { get; set; }
         }
 
