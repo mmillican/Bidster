@@ -27,6 +27,7 @@ using Bidster.Services.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Amazon.SimpleEmail;
+using Bidster.Services.Tenants;
 
 namespace Bidster
 {
@@ -85,6 +86,8 @@ namespace Bidster
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
 
+            services.AddScoped<ITenantService, TenantService>();
+            services.AddScoped<ITenantContext, TenantContext>();
             services.AddSingleton<IEmailSender, AmazonSesEmailSender>();
             services.AddTransient<IViewRenderer, ViewRenderer>();
             services.AddScoped<IBidService, BidService>();

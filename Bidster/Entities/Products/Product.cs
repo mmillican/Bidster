@@ -1,12 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Bidster.Entities.Events;
+using Bidster.Entities.Tenants;
 
 namespace Bidster.Entities.Products
 {
     public class Product 
     {
         public int Id { get; set; }
+
+        public int TenantId { get; set; }
+        [ForeignKey(nameof(TenantId))]
+        public virtual Tenant Tenant { get; set; }
 
         public int EventId { get; set; }
         [ForeignKey(nameof(EventId))]

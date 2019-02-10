@@ -1,6 +1,7 @@
 ﻿using Bidster.Entities.Bids;
 using Bidster.Entities.Events;
 using Bidster.Entities.Products;
+using Bidster.Entities.Tenants;
 using Bidster.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -10,6 +11,8 @@ namespace Bidster.Data
 {
     public class BidsterDbContext : IdentityDbContext<User, Role, int>
     {
+        public DbSet<Tenant> Tenants { get; set; }
+
         public DbSet<Event> Events { get; set; }
         public DbSet<EventUser> EventUsers { get; set; }
 
