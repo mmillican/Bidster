@@ -1,0 +1,40 @@
+﻿@model Bidster.Models.Tenants.EditTenantViewModel
+@{
+    ViewData["Title"] = "Edit Tenant";
+}
+
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-basic-tab" data-toggle="tab" href="#tab-basic" role="tab" aria-controls="tab-basic" aria-selected="true">Basic</a>
+        <a class="nav-item nav-link" id="nav-branding-tab" data-toggle="tab" href="#tab-branding" role="tab" aria-controls="tab-branding" aria-selected="false">Branding</a>
+        <a class="nav-item nav-link" id="nav-users-tab" data-toggle="tab" href="#tab-users" role="tab" aria-controls="tab-users" aria-selected="false">Users</a>
+        <a class="nav-item nav-link" id="nav-settings-tab" data-toggle="tab" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false">Settings</a>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane show active" id="tab-basic" role="tabpanel" aria-labelledby="nav-basic-tab">
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            <div class="row">
+                <div class="col-md-6">
+                    <partial name="_EditForm" model="Model" />
+
+                    <button type="submit" class="btn btn-primary">Save Tenant</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="tab-pane" id="tab-branding" role="tabpanel" aria-labelledby="nav-branding-tab">
+        <h4>Branding</h4>
+        ...
+    </div>
+    <div class="tab-pane" id="tab-users" role="tabpanel" aria-labelledby="nav-users-tab">
+        <h4>Users</h4>
+        ...
+    </div>
+    <div class="tab-pane" id="tab-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+        <h4>Settings</h4>
+        ...
+    </div>
+</div>
+
+

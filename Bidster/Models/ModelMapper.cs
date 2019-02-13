@@ -2,15 +2,25 @@ using System;
 using Bidster.Entities.Bids;
 using Bidster.Entities.Events;
 using Bidster.Entities.Products;
+using Bidster.Entities.Tenants;
 using Bidster.Models.Bids;
 using Bidster.Models.Events;
 using Bidster.Models.EventUsers;
 using Bidster.Models.Products;
+using Bidster.Models.Tenants;
 
 namespace Bidster.Models
 {
     public static class ModelMapper
     {
+        public static TenantModel ToTenantModel(this Tenant tenant) => new TenantModel
+        {
+            Id = tenant.Id,
+            Name = tenant.Name,
+            HostNames = tenant.HostNames,
+            IsDisabled = tenant.IsDisabled
+        };
+
         public static EventModel ToEventModel(this Event evt) => new EventModel
         {
             Id = evt.Id,

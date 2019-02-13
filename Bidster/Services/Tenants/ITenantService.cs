@@ -11,6 +11,8 @@ namespace Bidster.Services.Tenants
 
         Task<List<Tenant>> GetAllAsync();
 
+        Task<bool> DoesHostNameExistAsync(string hostName, int? existingId = null);
+
         Task CreateAsync(Tenant tenant);
         Task UpdateAsync(Tenant tenant);
 

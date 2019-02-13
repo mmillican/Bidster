@@ -22,6 +22,9 @@ namespace Bidster.Services.Tenants
 
         public Task<List<Tenant>> GetAllAsync() => _dbContext.Tenants.ToListAsync();
 
+        public Task<bool> DoesHostNameExistAsync(string hostName, int? existingId = null) =>
+            _dbContext.Tenants.AnyAsync(x => (!existingId.HasValue || x.Id != existingId.Value) && x.HostNames.Contains(hostName));
+
         public async Task CreateAsync(Tenant tenant)
         {
             _dbContext.Tenants.Add(tenant);

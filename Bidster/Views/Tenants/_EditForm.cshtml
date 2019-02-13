@@ -1,0 +1,19 @@
+﻿@model Bidster.Models.Tenants.EditTenantViewModel
+
+<div class="form-group">
+    <label asp-for="Name"></label>
+    <input type="text" asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="HostNames"></label>
+    <input type="text" asp-for="HostNames" class="form-control" />
+    <span class="text-muted">Must be in form <span class="text-monospace">name.domain.com</span> and separated with ;</span>
+    <span asp-validation-for="HostNames" class="text-danger"></span>
+</div>
+<div class="checkbox">
+    <label asp-for="IsDisabled">
+        <input asp-for="IsDisabled" />
+        Disabled
+    </label>
+</div>
