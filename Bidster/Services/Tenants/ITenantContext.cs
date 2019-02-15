@@ -6,5 +6,6 @@ namespace Bidster.Services.Tenants
     public interface ITenantContext
     {
         Task<Tenant> GetCurrentTenantAsync();
+        Task<TenantSettings> GetCurrentSettingsAsync();
     }
 }

@@ -13,5 +13,7 @@ namespace Bidster.Entities.Tenants
         public string HostNames { get; set; }
 
         public bool IsDisabled { get; set; }
+
+        public string Settings { get; set; }
     }
 }

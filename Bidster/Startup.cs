@@ -71,6 +71,7 @@ namespace Bidster
 
             services.AddKendo();
             services.AddSignalR();
+            services.AddMemoryCache();
 
             // TODO: Can't inject any scoped services into auth handlers, so need to figure out how to get this to work
             //services.AddAuthorization(options =>

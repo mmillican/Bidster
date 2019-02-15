@@ -2,9 +2,9 @@
 
 namespace Bidster.Models.Tenants
 {
-    public class EditTenantViewModel : TenantModel
+    public class TenantSettingsViewModel
     {
-        public string Tab { get; set; }
+        public int Id { get; set; }
 
         public TenantSettings Settings { get; set; }
     }

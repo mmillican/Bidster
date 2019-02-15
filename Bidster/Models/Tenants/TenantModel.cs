@@ -10,7 +10,7 @@ namespace Bidster.Models.Tenants
         [Required, MaxLength(50)]
         public string Name { get; set; }
 
-        [Display(Name = "Host name(s)")]
+        [Display(Name = "Host name")]
         [Required, MaxLength(255)]
         public string HostNames { get; set; }
 

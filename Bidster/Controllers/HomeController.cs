@@ -10,20 +10,24 @@ using Bidster.Models.Home;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Bidster.Entities.Users;
+using Bidster.Services.Tenants;
 
 namespace Bidster.Controllers
 {
     public class HomeController : Controller
     {
         private readonly BidsterDbContext _dbContext;
+        private readonly ITenantContext _tenantContext;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
         public HomeController(BidsterDbContext dbContext,
+            ITenantContext tenantContext,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
         {
             _dbContext = dbContext;
+            _tenantContext = tenantContext;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -31,6 +35,8 @@ namespace Bidster.Controllers
         public async Task<IActionResult> Index()
         {
             var model = new HomeViewModel();
+            model.Settings = await _tenantContext.GetCurrentSettingsAsync();
+
             model.Events = await _dbContext.Events
                 .Where(x => x.DisplayOn <= DateTime.Now 
                     && x.EndOn >= DateTime.Now)

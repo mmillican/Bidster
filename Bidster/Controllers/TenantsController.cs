@@ -13,7 +13,7 @@ namespace Bidster.Controllers
 {
     [Authorize] // TODO: Super admin only
     [Route("tenants")]
-    public class TenantsController : Controller
+    public class TenantsController : BaseController
     {
         private readonly ITenantService _tenantService;
         private readonly ILogger<TenantsController> _logger;
@@ -81,7 +81,7 @@ namespace Bidster.Controllers
         }
 
         [HttpGet("edit/{id}")]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string tab = null)
         {
             var tenant = await _tenantService.GetByIdAsync(id);
             if (tenant == null)
@@ -92,6 +92,7 @@ namespace Bidster.Controllers
 
             var model = new EditTenantViewModel
             {
+                Tab = tab,
                 Id = tenant.Id,
                 Name = tenant.Name,
                 HostNames = tenant.HostNames,
@@ -146,6 +147,36 @@ namespace Bidster.Controllers
                 // TODO: show error
                 return View(model);
             }
+
+        }
+
+        [HttpPost("settings/{tenantId}")]
+        public async Task<IActionResult> UpdateSettings(int tenantId, TenantSettingsViewModel model)
+        {
+            var tenant = await _tenantService.GetByIdAsync(tenantId);
+            if (tenant == null)
+            {
+                // TODO: check if user has access to tenant
+                // TODO: show error
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                // Not really sure how I feel about exposing the actual TenantSettings to the UI
+                // But for purposes of "MVP" it works for now. Revisit later
+                await _tenantService.SaveSettingsAsync(tenantId, model.Settings);
+
+                AddSuccessNotice("The settings have been updated.");
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error saving settings for tenant {id}", tenantId);
+
+                AddErrorNotice("There was an error updating the settings.");
+            }
+
+            return RedirectToAction(nameof(Edit), new { id = tenantId, tab = "settings" }); // TODO: Not ideal because un-saved form values will be lost
         }
     }
 }

@@ -16,6 +16,9 @@ namespace Bidster.Services.Tenants
         Task CreateAsync(Tenant tenant);
         Task UpdateAsync(Tenant tenant);
 
+        Task<TenantSettings> GetSettingsAsync(int tenantId);
+        Task SaveSettingsAsync(int tenantId, TenantSettings settings);
+
         bool ContainsHostName(Tenant tenant, string host);
     }
 }
