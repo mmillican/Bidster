@@ -55,7 +55,7 @@ namespace Bidster.Controllers
 
             if (!ModelState.IsValid)
             {
-                // TODO: show error
+                AddErrorNotice("Sorry, something is not right with your tenant. Please try again.");
                 return View(model);
             }
 
@@ -75,18 +75,18 @@ namespace Bidster.Controllers
             catch(Exception ex)
             {
                 _logger.LogError(ex, "Error creating tenant");
-                // TODO: show error
+                AddErrorNotice("Sorry, something went wrong saving the tenant. Please try again.");
                 return View(model);
             }
         }
 
         [HttpGet("edit/{id}")]
-        public async Task<IActionResult> Edit(int id, string tab = null)
+        public async Task<IActionResult> Edit(int id, string tab = "basic")
         {
             var tenant = await _tenantService.GetByIdAsync(id);
             if (tenant == null)
             {
-                // TODO: Show error
+                AddErrorNotice("Tenant was not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -108,7 +108,7 @@ namespace Bidster.Controllers
             var tenant = await _tenantService.GetByIdAsync(id);
             if (tenant == null)
             {
-                // TODO: Show error
+                AddErrorNotice("Tenant was not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -127,7 +127,7 @@ namespace Bidster.Controllers
 
             if (!ModelState.IsValid)
             {
-                // TODO: show error
+                AddErrorNotice("Something isn't right with your tenant information. Please update and try again.");
                 return View(model);
             }
 
@@ -144,7 +144,7 @@ namespace Bidster.Controllers
             catch(Exception ex)
             {
                 _logger.LogError(ex, "Error updating tenant {id}", id);
-                // TODO: show error
+                AddErrorNotice("There was an error updating the tenant.");
                 return View(model);
             }
 
@@ -157,7 +157,7 @@ namespace Bidster.Controllers
             if (tenant == null)
             {
                 // TODO: check if user has access to tenant
-                // TODO: show error
+                AddErrorNotice("Tenant was not found.");
                 return RedirectToAction(nameof(Index));
             }
 

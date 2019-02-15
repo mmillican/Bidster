@@ -23,12 +23,9 @@
         </form>
     </div>
     <div class="tab-pane @(Model.Tab == "users" ? "active" : "")" id="tab-users" role="tabpanel" aria-labelledby="nav-users-tab">
-        <h4>Users</h4>
         ...
     </div>
     <div class="tab-pane @(Model.Tab == "settings" ? "active" : "")" id="tab-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
-        <h4>Settings</h4>
-
         <vc:tenant-settings tenant-id="@Model.Id" />
     </div>
 </div>
