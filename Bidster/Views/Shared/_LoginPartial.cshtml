@@ -4,15 +4,19 @@
 @if (SignInManager.IsSignedIn(User))
 {
     var user = await UserManager.GetUserAsync(User);
-    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm" class="form-inline my-2 my-lg-0">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="nav-link" title="Manage">@user.FullName</a>
-            </li>
-            <li class="nav-item">
-                <button type="submit" class="btn btn-link navbar-btn nav-link">Logout</button>
-            </li>
-        </ul>
+    <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">@user.FullName</a>
+            <div class="dropdown-menu">
+                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="dropdown-item" title="Manage">@user.FullName</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit()">Logout</a>
+            </div>
+        </li>
+    </ul>
+
+    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm" class="hidden">
+        
     </form>
 }
 else
