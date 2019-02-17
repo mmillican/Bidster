@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bidster.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize]
     [Route("events/{evtSlug}/users")]
     public class EventUsersController : Controller

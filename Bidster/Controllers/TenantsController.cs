@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Bidster.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize] // TODO: Super admin only
     [Route("tenants")]
     public class TenantsController : BaseController

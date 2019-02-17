@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bidster.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize]
     [Route("bids")]
     public class BidsController : BaseController

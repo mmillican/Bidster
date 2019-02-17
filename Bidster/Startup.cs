@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Amazon.SimpleEmail;
 using Bidster.Services.Tenants;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Bidster
 {
@@ -80,6 +81,11 @@ namespace Bidster
             //});
             //services.AddSingleton<IAuthorizationHandler, EventAdminHandler>();
 
+            services.AddSwaggerGen(opts =>
+            {
+                opts.SwaggerDoc("v1", new Info { Title = "Bidster API", Version = "1" });
+            });
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
@@ -126,6 +132,13 @@ namespace Bidster
             app.UseSignalR(routes =>
             {
                 routes.MapHub<BidsterHub>("/bidster");
+            });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(ui =>
+            {
+                ui.SwaggerEndpoint("/swagger/v1/swagger.json", "Bidster API");
+                ui.RoutePrefix = "api-docs";
             });
 
             app.UseAuthentication();

@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bidster.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("events/{evtSlug}/products")]
     public class ProductsController : Controller
     {
