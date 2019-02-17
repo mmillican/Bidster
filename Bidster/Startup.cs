@@ -95,6 +95,7 @@ namespace Bidster
 
             services.AddScoped<ITenantService, TenantService>();
             services.AddScoped<ITenantContext, TenantContext>();
+            services.AddScoped<ITenantUserService, TenantUserService>();
             services.AddSingleton<IEmailSender, AmazonSesEmailSender>();
             services.AddTransient<IViewRenderer, ViewRenderer>();
             services.AddScoped<IBidService, BidService>();

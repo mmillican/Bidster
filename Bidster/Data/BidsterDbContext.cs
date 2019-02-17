@@ -12,6 +12,7 @@ namespace Bidster.Data
     public class BidsterDbContext : IdentityDbContext<User, Role, int>
     {
         public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<TenantUser> TenantUsers { get; set; }
 
         public DbSet<Event> Events { get; set; }
         public DbSet<EventUser> EventUsers { get; set; }

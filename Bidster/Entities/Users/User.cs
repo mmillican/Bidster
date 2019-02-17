@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Bidster.Entities.Tenants;
 using Microsoft.AspNetCore.Identity;
 
 namespace Bidster.Entities.Users
@@ -39,5 +40,7 @@ namespace Bidster.Entities.Users
         /// Navigation property for this users login accounts.
         /// </summary>
         public virtual ICollection<IdentityUserLogin<int>> Logins { get; } = new List<IdentityUserLogin<int>>();
+
+        public virtual ICollection<TenantUser> Tenants { get; } = new List<TenantUser>();
     }
 }

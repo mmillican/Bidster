@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Bidster.Entities.Tenants
 {
@@ -15,5 +17,7 @@ namespace Bidster.Entities.Tenants
         public bool IsDisabled { get; set; }
 
         public string Settings { get; set; }
+
+        public virtual ICollection<TenantUser> Users { get; } = new List<TenantUser>();
     }
 }
