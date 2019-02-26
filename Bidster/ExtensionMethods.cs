@@ -33,5 +33,7 @@ namespace Bidster
 
             return input.Substring(0, maxLength);
         }
+
+        public static string Friendly(this bool val) => val ? "Yes" : "No";
     }
 }

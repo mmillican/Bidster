@@ -27,6 +27,8 @@ using Bidster.Services.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Amazon.SimpleEmail;
+using Bidster.Services.Tenants;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Bidster
 {
@@ -70,13 +72,20 @@ namespace Bidster
 
             services.AddKendo();
             services.AddSignalR();
+            services.AddMemoryCache();
 
             // TODO: Can't inject any scoped services into auth handlers, so need to figure out how to get this to work
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("EventAdmin", policy => policy.AddRequirements(new EventAdminRequirement()));
-            //});
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Policies.Admin, policy => policy.RequireRole(Roles.Admin));
+                //options.AddPolicy("EventAdmin", policy => policy.AddRequirements(new EventAdminRequirement()));
+            });
             //services.AddSingleton<IAuthorizationHandler, EventAdminHandler>();
+
+            services.AddSwaggerGen(opts =>
+            {
+                opts.SwaggerDoc("v1", new Info { Title = "Bidster API", Version = "1" });
+            });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -85,6 +94,9 @@ namespace Bidster
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
 
+            services.AddScoped<ITenantService, TenantService>();
+            services.AddScoped<ITenantContext, TenantContext>();
+            services.AddScoped<ITenantUserService, TenantUserService>();
             services.AddSingleton<IEmailSender, AmazonSesEmailSender>();
             services.AddTransient<IViewRenderer, ViewRenderer>();
             services.AddScoped<IBidService, BidService>();
@@ -122,6 +134,13 @@ namespace Bidster
             app.UseSignalR(routes =>
             {
                 routes.MapHub<BidsterHub>("/bidster");
+            });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(ui =>
+            {
+                ui.SwaggerEndpoint("/swagger/v1/swagger.json", "Bidster API");
+                ui.RoutePrefix = "api-docs";
             });
 
             app.UseAuthentication();

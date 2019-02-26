@@ -1,0 +1,161 @@
+﻿@model Bidster.Models.Tenants.EditTenantViewModel
+@{
+    ViewData["Title"] = "Edit Tenant";
+}
+
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link @(Model.Tab == "basic" ? "active" : "")" id="nav-basic-tab" data-toggle="tab" href="#tab-basic" role="tab" aria-controls="tab-basic" aria-selected="true">Basic</a>
+        <a class="nav-item nav-link @(Model.Tab == "users" ? "active" : "")" id="nav-users-tab" data-toggle="tab" href="#tab-users" role="tab" aria-controls="tab-users" aria-selected="false">Users</a>
+        <a class="nav-item nav-link @(Model.Tab == "settings" ? "active" : "")" id="nav-settings-tab" data-toggle="tab" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false">Settings</a>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane show @(Model.Tab == "basic" ? "active" : "")" id="tab-basic" role="tabpanel" aria-labelledby="nav-basic-tab">
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            <div class="row">
+                <div class="col-md-6">
+                    <partial name="_EditForm" model="Model" />
+
+                    <button type="submit" class="btn btn-primary">Save Tenant</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="tab-pane @(Model.Tab == "users" ? "active" : "")" id="tab-users" role="tabpanel" aria-labelledby="nav-users-tab">
+        <div id="tenant-user-admin" class="mt-2">
+            <h5>Add User</h5>
+
+            <form v-on:submit.prevent="addUser()" class="form-inline mb-4">
+                <div class="form-group">
+                    <label for="bid-amount" class="sr-only">Bid Amount</label>
+                    <div class="input-group">
+                        <input type="text" id="new-user-email" name="NewUserEmail" class="form-control" v-model="newUser.email" placeholder="user@@domain.com" />
+                        <span class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Add User</button>
+                        </span>
+                    </div>
+                </div>
+            </form>
+
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>User</th>
+                    <th>Added</th>
+                    <th>Is Admin</th>
+                    <th></th>
+                </tr>
+                <tr v-for="user in users">
+                    <td>{{ user.user.fullName }}</td>
+                    <td>{{ user.addedOn | date }}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-link" v-on:click="setAdminFlag(user, !user.isAdmin)" title="Click to change user's admin status">
+                            {{ user.isAdmin ? 'Yes' : 'No' }}
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger" v-on:click="removeUser(user)">Remove</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="tab-pane @(Model.Tab == "settings" ? "active" : "")" id="tab-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+        <vc:tenant-settings tenant-id="@Model.Id" />
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_VueScripts" />
+    <script>
+        var tenantUserApp = new Vue({
+            el: '#tenant-user-admin',
+            data: {
+                tenantId: @Model.Id,
+                users: [],
+                newUser: {
+                    tenantId: @Model.Id,
+                    userId: 0,
+                    email: null,
+                    isAdmin: false
+                }
+            },
+            created: function () {
+                this.refreshUsers();
+            },
+            methods: {
+                refreshUsers: function () {
+                    var self = this;
+                    var xhr = new XMLHttpRequest();
+
+                    xhr.open('GET', '/api/tenants/' + self.tenantId + '/users');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+                            self.users = JSON.parse(xhr.response);
+                        }
+                    };
+
+                    xhr.send();
+                },
+                addUser: function () {
+                    var self = this;
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/tenants/' + self.tenantId + '/users');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 201) {
+                            self.refreshUsers();
+                            notificationsApp.addNotification('success', user.user.fullName + ' has been added to the tenant.');
+                        }
+                    };
+
+                    xhr.send(JSON.stringify(self.newUser));
+
+                },
+                setAdminFlag: function (user, isAdmin) {
+                    var self = this;
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('PUT', '/api/tenants/' + self.tenantId + '/users/' + user.userId);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+                            notificationsApp.addNotification('success', user.user.fullName + '\'s admin status has been updated.');
+                        }
+                    };
+
+                    user.isAdmin = isAdmin;
+                    xhr.send(JSON.stringify(user));
+                },
+                removeUser: function (user) {
+                    if (!confirm('Are you sure you want to remove this user?')) {
+                        return;
+                    }
+
+                    var self = this;
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('DELETE', '/api/tenants/' + self.tenantId + '/users/' + user.userId);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+                            self.refreshUsers();
+                            notificationsApp.addNotification('success', user.user.fullName + ' has been removed from the tenant.');
+                        }
+                    };
+
+                    xhr.send();
+                }
+            },
+            filters: {
+                date: function (value) {
+                    return kendo.toString(new Date(value), 'd');
+                }
+            }
+        })
+    </script>
+}

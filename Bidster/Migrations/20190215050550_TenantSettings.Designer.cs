@@ -4,14 +4,16 @@ using Bidster.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Bidster.Migrations
 {
     [DbContext(typeof(BidsterDbContext))]
-    partial class BidsterDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190215050550_TenantSettings")]
+    partial class TenantSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,29 +174,6 @@ namespace Bidster.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tenants");
-                });
-
-            modelBuilder.Entity("Bidster.Entities.Tenants.TenantUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("AddedOn");
-
-                    b.Property<bool>("IsAdmin");
-
-                    b.Property<int>("TenantId");
-
-                    b.Property<int>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TenantUsers");
                 });
 
             modelBuilder.Entity("Bidster.Entities.Users.Role", b =>
@@ -429,19 +408,6 @@ namespace Bidster.Migrations
                     b.HasOne("Bidster.Entities.Tenants.Tenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Bidster.Entities.Tenants.TenantUser", b =>
-                {
-                    b.HasOne("Bidster.Entities.Tenants.Tenant", "Tenant")
-                        .WithMany("Users")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Bidster.Entities.Users.User", "User")
-                        .WithMany("Tenants")
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

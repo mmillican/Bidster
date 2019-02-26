@@ -3,10 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bidster.Data;
 using Bidster.Entities.Events;
+using Bidster.Entities.Tenants;
 using Bidster.Entities.Users;
 using Bidster.Models;
 using Bidster.Models.Events;
 using Bidster.Services.FileStorage;
+using Bidster.Services.Tenants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,32 +17,39 @@ using Microsoft.Extensions.Logging;
 
 namespace Bidster.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("events")]
     public class EventsController : Controller
     {
         private readonly BidsterDbContext _dbContext;
+        private readonly ITenantContext _tenantContext;
         private readonly UserManager<User> _userManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly IFileService _fileService;
         private readonly ILogger<EventsController> _logger;
 
         public EventsController(BidsterDbContext dbContext,
+            ITenantContext tenantContext,
             UserManager<User> userManager,
             IAuthorizationService authorizationService,
             IFileService fileService,
             ILogger<EventsController> logger)
         {
             _dbContext = dbContext;
+            _tenantContext = tenantContext;
             _userManager = userManager;
             _authorizationService = authorizationService;
             _fileService = fileService;
-            this._logger = logger;
+            _logger = logger;
         }
 
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
             var events = await _dbContext.Events
+                .Where(x => x.TenantId == tenant.Id)
                 .Select(x => ModelMapper.ToEventModel(x))
                 .ToListAsync();
 
@@ -55,8 +64,10 @@ namespace Bidster.Controllers
         [HttpGet("{slug}")]
         public async Task<IActionResult> Details(string slug)
         {
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
             var evt = await _dbContext.Events.Include(x => x.Users).SingleOrDefaultAsync(x => x.Slug == slug);
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
                 return RedirectToAction(nameof(Index));
@@ -89,8 +100,10 @@ namespace Bidster.Controllers
         [HttpGet("{slug}/all-bids")]
         public async Task<IActionResult> AllBids(string slug)
         {
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
             var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == slug);
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
                 return RedirectToAction(nameof(Index));
@@ -147,8 +160,10 @@ namespace Bidster.Controllers
         [HttpGet("{slug}/winning-bids")]
         public async Task<IActionResult> WinningBids(string slug)
         {
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
             var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == slug);
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
                 return RedirectToAction(nameof(Index));
@@ -209,7 +224,9 @@ namespace Bidster.Controllers
         public IActionResult Create()
         {
             var model = new EditEventViewModel();
-            model.DisplayOn = DateTime.Now;
+            model.StartOn = DateTime.Now.Date;
+            model.EndOn = DateTime.Now.Date.AddDays(1);
+            model.DisplayOn = DateTime.Now.Date;
 
             return View(model);
         }
@@ -223,12 +240,15 @@ namespace Bidster.Controllers
                 return View(model);
             }
 
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
             try
             {
                 var user = await _userManager.GetUserAsync(User);
 
                 var evt = new Event
                 {
+                    Tenant = tenant,
                     Name = model.Name,
                     Description = model.Description,
                     StartOn = model.StartOn,
@@ -240,7 +260,7 @@ namespace Bidster.Controllers
                     CreatedOn = DateTime.UtcNow
                 };
 
-                evt.Slug = await GenerateSlug(evt.Name);
+                evt.Slug = await GenerateSlug(tenant, evt.Name);
 
                 _dbContext.Events.Add(evt);
                 await _dbContext.SaveChangesAsync();
@@ -258,9 +278,11 @@ namespace Bidster.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
             var evt = await _dbContext.Events.FindAsync(id);
             var user = await _userManager.GetUserAsync(User);
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Could not find event ID '{id}'", id);
                 return RedirectToAction(nameof(Index));
@@ -294,10 +316,12 @@ namespace Bidster.Controllers
             {
                 return View(model);
             }
-            
+
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
             var evt = await _dbContext.Events.FindAsync(id);
             var user = await _userManager.GetUserAsync(User);
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Could not find event ID '{id}'", id);
                 return RedirectToAction(nameof(Index));
@@ -330,18 +354,18 @@ namespace Bidster.Controllers
             }
         }
 
-        private async Task<string> GenerateSlug(string name)
+        private async Task<string> GenerateSlug(Tenant tenant, string name)
         {
             var slug = name.Clean();
 
-            if (!await _dbContext.Events.AnyAsync(x => x.Slug == slug))
+            if (!await _dbContext.Events.AnyAsync(x => x.TenantId == tenant.Id && x.Slug == slug))
             {
                 return slug;
             }
         
             var appendIdx = 1;
             var modSlug = $"{slug}-{appendIdx})";
-            while (await _dbContext.Events.AnyAsync(x => x.Slug == modSlug))
+            while (await _dbContext.Events.AnyAsync(x => x.TenantId == tenant.Id && x.Slug == modSlug))
             {
                 appendIdx++;
                 modSlug = $"{slug}-{appendIdx})";
@@ -353,6 +377,7 @@ namespace Bidster.Controllers
         // TODO: Would be nice to have this be an actual auth policy, but need to figure out adding claims first
         private async Task<bool> AuthorizeEventAdmin(Event evt)
         {
+            // TODO: Needs to be tenant aware 
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {

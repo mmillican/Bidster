@@ -9,6 +9,7 @@ using Bidster.Entities.Users;
 using Bidster.Models;
 using Bidster.Models.Products;
 using Bidster.Services.FileStorage;
+using Bidster.Services.Tenants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,20 +18,24 @@ using Microsoft.Extensions.Logging;
 
 namespace Bidster.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("events/{evtSlug}/products")]
     public class ProductsController : Controller
     {
         private readonly BidsterDbContext _dbContext;
+        private readonly ITenantContext _tenantContext;
         private readonly UserManager<User> _userManager;
         private readonly IFileService _fileService;
         private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(BidsterDbContext dbContext,
+            ITenantContext tenantContext,
             UserManager<User> userManager,
             IFileService fileService,
             ILogger<ProductsController> logger)
         {
             _dbContext = dbContext;
+            _tenantContext = tenantContext;
             _userManager = userManager;
             _fileService = fileService;
             _logger = logger;
@@ -39,14 +44,16 @@ namespace Bidster.Controllers
         [HttpGet("{slug}")]
         public async Task<IActionResult> Details(string evtSlug, string slug)
         {
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             if (evt == null)
             {
                 _logger.LogInformation("Event slug '{evtSlug}' not found", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            var product = await _dbContext.Products.SingleOrDefaultAsync(x => x.EventId == evt.Id && x.Slug == slug);
+            var product = await _dbContext.Products.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.EventId == evt.Id && x.Slug == slug);
             if (product == null)
             {
                 _logger.LogInformation("Product slug '{slug}' not found or does not belong to event '{evtSlug}'", slug, evtSlug);
@@ -74,7 +81,9 @@ namespace Bidster.Controllers
         [HttpGet("new")]
         public async Task<IActionResult> Create(string evtSlug)
         {
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
             if (evt == null)
@@ -107,7 +116,9 @@ namespace Bidster.Controllers
         [HttpPost("new")]
         public async Task<IActionResult> Create(string evtSlug, EditProductViewModel model)
         {
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
             if (!ModelState.IsValid)
@@ -135,6 +146,7 @@ namespace Bidster.Controllers
             {
                 var product = new Product
                 {
+                    Tenant = tenant,
                     Event = evt,
                     Name = model.Name,
                     Description = model.Description,
@@ -193,7 +205,9 @@ namespace Bidster.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(string evtSlug, int id)
         {
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
             if (evt == null)
@@ -251,7 +265,9 @@ namespace Bidster.Controllers
         [HttpPost("edit/{id}")]
         public async Task<IActionResult> Edit(string evtSlug, int id, EditProductViewModel model)
         {
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
             if (evt == null)

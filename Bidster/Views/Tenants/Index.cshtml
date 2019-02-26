@@ -1,0 +1,26 @@
+﻿@model Bidster.Models.Tenants.TenantListViewModel
+@{
+    ViewData["Title"] = "Tenants";
+}
+
+<div class="actions mb-2">
+    <a asp-action="Create" class="btn btn-success">New Tenant</a>
+</div>
+
+<table class="table table-sm table-striped table-hover">
+    <tr>
+        <th>Name</th>
+        <th>Hostname(s)</th>
+        <th>Disabled</th>
+    </tr>
+    @foreach(var tenant in Model.Tenants)
+    {
+        <tr>
+            <td>
+                <a asp-action="Edit" asp-route-id="@tenant.Id">@tenant.Name</a>
+            </td>
+            <td>@tenant.HostNames</td>
+            <td>@tenant.IsDisabled.Friendly()</td>
+        </tr>
+    }
+</table>

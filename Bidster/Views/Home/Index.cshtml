@@ -1,4 +1,8 @@
 ﻿@model Bidster.Models.Home.HomeViewModel
+@inject Bidster.Services.Tenants.ITenantContext TenantContext
+@{
+    var tenant = await TenantContext.GetCurrentTenantAsync();
+}
 
 @{
     ViewData["Title"] = "Welcome";
@@ -8,9 +12,9 @@
     {
     <div class="jumbotron">
         <div class="container">
-            <h1>Fundraiser Site Name</h1>
+            <h1>@Model.Settings.Branding.Title</h1>
 
-            <h3>Raising money for the best causes</h3>
+            <h3>@Model.Settings.Branding.SubTitle</h3>
         </div>
     </div>
 }
