@@ -20,6 +20,9 @@ namespace Bidster.Services.Tenants
 
         public Task<TenantUser> GetByIdAsync(int id) => _dbContext.TenantUsers.FindAsync(id);
 
+        public Task<TenantUser> GetAsync(int tenantId, int userId) =>
+            _dbContext.TenantUsers.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.UserId == userId);
+
         public async Task<IList<TenantUser>> GetByTenantIdAsync(int tenantId) => 
             await _dbContext.TenantUsers.Include(x => x.User).Where(x => x.TenantId == tenantId).ToListAsync();
 

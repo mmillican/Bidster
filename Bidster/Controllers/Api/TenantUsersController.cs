@@ -72,13 +72,13 @@ namespace Bidster.Controllers.Api
         [ProducesResponseType(400)]
         public async Task<ActionResult<TenantUserModel>> Create([FromRoute]int tenantId, [FromBody] CreateTenantUserModel model)
         {
-            var user = await _userManager.FindByIdAsync(model.UserId.ToString());
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                ModelState.AddModelError("UserId", "Invalid user ID");
+                ModelState.AddModelError("UserEmail", "Invalid user email");
             }
 
-            if (await _tenantUserService.IsUserInTenantAsync(model.UserId, tenantId))
+            if (await _tenantUserService.IsUserInTenantAsync(user.Id, tenantId))
             {
                 ModelState.AddModelError("UserId", "User is already a member of this tenant");
             }
@@ -93,7 +93,7 @@ namespace Bidster.Controllers.Api
                 var tenantUser = new TenantUser
                 {
                     TenantId = tenantId,
-                    UserId = model.UserId,
+                    User = user,
                     AddedOn = _systemClock.UtcNow.Date,
                     IsAdmin = model.IsAdmin
                 };
@@ -110,6 +110,63 @@ namespace Bidster.Controllers.Api
                 return StatusCode(500);
             }
         }
+
+        [HttpPut("{userId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<TenantUserModel>> Delete([FromRoute] int tenantId, [FromRoute] int userId, TenantUserModel model)
+        {
+            // TODO: Validate tenant and user
+
+            try
+            {
+                var tenantUser = await _tenantUserService.GetAsync(tenantId, userId);
+                if (tenantUser == null)
+                {
+                    return NotFound();
+                }
+
+                tenantUser.IsAdmin = model.IsAdmin;
+
+                await _tenantUserService.UpdateAsync(tenantUser);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating tenant user");
+                return StatusCode(500);
+            }
+
+        }
+
+        [HttpDelete("{userId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<TenantUserModel>> Delete([FromRoute] int tenantId, [FromRoute] int userId)
+        {
+            // TODO: Validate tenant and user
+
+            try
+            {
+                var tenantUser = await _tenantUserService.GetAsync(tenantId, userId);
+                if (tenantUser == null)
+                {
+                    return NotFound();
+                }
+
+                await _tenantUserService.DeleteAsync(tenantUser);
+                
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing user from tenant");
+                return StatusCode(500);
+            }
+
+        }
     }
 
     public class CreateTenantUserModel
@@ -119,6 +176,7 @@ namespace Bidster.Controllers.Api
         public int TenantId { get; set; }
 
         public int UserId { get; set; }
+        public string Email { get; set; }
 
         public DateTime AddedOn { get; set; }
 

@@ -8,6 +8,7 @@ namespace Bidster.Services.Tenants
     public interface ITenantUserService
     {
         Task<TenantUser> GetByIdAsync(int id);
+        Task<TenantUser> GetAsync(int tenantId, int userId);
 
         Task<IList<TenantUser>> GetByTenantIdAsync(int tenantId);
         Task<IList<TenantUser>> GetByUserIdAsync(int userId);
