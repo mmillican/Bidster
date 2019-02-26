@@ -12,4 +12,14 @@
         public const string TenantByHost = "bidster.tenant.host-{0}";
         public const string TenantSettings = "bidster.tenant.settings-{0}";
     }
+
+    public static class Policies
+    {
+        public const string Admin = nameof(Admin);
+    }
+
+    public static class Roles
+    {
+        public const string Admin = nameof(Admin);
+    }
 }

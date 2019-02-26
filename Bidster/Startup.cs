@@ -75,10 +75,11 @@ namespace Bidster
             services.AddMemoryCache();
 
             // TODO: Can't inject any scoped services into auth handlers, so need to figure out how to get this to work
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("EventAdmin", policy => policy.AddRequirements(new EventAdminRequirement()));
-            //});
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Policies.Admin, policy => policy.RequireRole(Roles.Admin));
+                //options.AddPolicy("EventAdmin", policy => policy.AddRequirements(new EventAdminRequirement()));
+            });
             //services.AddSingleton<IAuthorizationHandler, EventAdminHandler>();
 
             services.AddSwaggerGen(opts =>
