@@ -80,7 +80,7 @@ namespace Bidster.Services.Notifications
 
                 await _hubContext.Clients.All.SendAsync("BidPlaced", bidRequest.Product.Name, bidRequest.Amount);
 
-                if (previousBid != null)
+                if (previousBid != null && previousBid.UserId != bidRequest.User.Id)
                 {
                     await SendOutbidNoticeAsync(bidRequest.Event, bidRequest.Product, previousBid, bid);
                 }
