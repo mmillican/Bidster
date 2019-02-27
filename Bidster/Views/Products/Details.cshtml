@@ -85,7 +85,7 @@
                             </template>
                         </td>
                     </tr>
-                    <tr>
+                    <tr v-if="bids.length > 5">
                         <td colspan="3">
                             <i>{{ bids.length - 5 }} more bids</i>
                         </td>
