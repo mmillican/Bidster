@@ -57,7 +57,7 @@
                 </form>
             </div>
             <div class="col-md-8">
-                <h3>Bid History</h3>
+                <h3>Bid History <small>{{ bids.length }} total bids</small></h3>
 
                 <div class="alert alert-info" v-if="event.hideBidderNames && event.hideUserAdmin">
                     Bidder names are hidden to public and only visible to event admins.
@@ -72,7 +72,7 @@
                         </tr>
                     </thead>
 
-                    <tr v-for="bid in bids">
+                    <tr v-for="bid in bids.slice(0, 5)">
                         <!-- TODO: format currency and date/time -->
                         <td>{{ bid.amount | currency }}</td>
                         <td>{{ bid.timestamp | date }}</td>
@@ -83,6 +83,11 @@
                             <template v-else>
                                 <i>Bidder names private</i>
                             </template>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <i>{{ bids.length - 5 }} more bids</i>
                         </td>
                     </tr>
                 </table>
