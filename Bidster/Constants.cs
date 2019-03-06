@@ -16,6 +16,8 @@
     public static class Policies
     {
         public const string Admin = nameof(Admin);
+        public const string TenantAdmin = nameof(TenantAdmin);
+        public const string TenantUser = nameof(TenantUser);
     }
 
     public static class Roles

@@ -1,9 +1,4 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Bidster.Data;
-using Bidster.Entities.Events;
 using Bidster.Entities.Products;
 using Bidster.Entities.Users;
 using Bidster.Models;
@@ -15,6 +10,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Bidster.Controllers
 {
@@ -26,18 +24,21 @@ namespace Bidster.Controllers
         private readonly ITenantContext _tenantContext;
         private readonly UserManager<User> _userManager;
         private readonly IFileService _fileService;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(BidsterDbContext dbContext,
             ITenantContext tenantContext,
             UserManager<User> userManager,
             IFileService fileService,
+            IAuthorizationService authorizationService,
             ILogger<ProductsController> logger)
         {
             _dbContext = dbContext;
             _tenantContext = tenantContext;
             _userManager = userManager;
             _fileService = fileService;
+            _authorizationService = authorizationService;
             _logger = logger;
         }
 
@@ -71,7 +72,7 @@ namespace Bidster.Controllers
                 model.Product.ImageUrl = _fileService.ResolveFileUrl(string.Format(Constants.ImagePathFormat, evt.Slug, product.ImageFilename));
             }
 
-            model.CanUserEdit = await AuthorizeEventAdmin(evt);
+            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
 
 
             return View(model);
@@ -86,15 +87,15 @@ namespace Bidster.Controllers
             var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
             {
-                return Unauthorized();
+                return Forbid();
             }
 
             var model = new EditProductViewModel
@@ -126,15 +127,15 @@ namespace Bidster.Controllers
                 return View(model);
             }
 
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
             {
-                return Unauthorized();
+                return Forbid();
             }
 
             // Reset event props in case something fails...
@@ -210,15 +211,15 @@ namespace Bidster.Controllers
             var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
             {
-                return Unauthorized();
+                return Forbid();
             }
 
             var product = await _dbContext.Products.FindAsync(id);
@@ -270,15 +271,15 @@ namespace Bidster.Controllers
             var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
-            if (evt == null)
+            if (evt == null || evt.TenantId != tenant.Id)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
             {
-                return Unauthorized();
+                return Forbid();
             }
 
             // Reset event props in case something fails...
@@ -386,28 +387,6 @@ namespace Bidster.Controllers
             }
 
             return filename;
-        }
-
-        // TODO: Would be nice to have this be an actual auth policy, but need to figure out adding claims first
-        private async Task<bool> AuthorizeEventAdmin(Event evt)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return false;
-            }
-
-            if (user.Id == evt.OwnerId)
-            {
-                return true;
-            }
-
-            var isEventAdmin = await _dbContext.EventUsers
-                .AnyAsync(x => x.EventId == evt.Id
-                    && x.UserId == user.Id
-                    && x.IsAdmin);
-
-            return isEventAdmin;
         }
     }
 }

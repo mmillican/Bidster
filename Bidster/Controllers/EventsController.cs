@@ -58,6 +58,8 @@ namespace Bidster.Controllers
                 Events = events
             };
 
+            model.CanCreateEvent = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
+
             return View(model);
         }
 
@@ -79,7 +81,7 @@ namespace Bidster.Controllers
             {
                 Event = ModelMapper.ToEventModel(evt)
             };
-            model.CanUserEdit = await AuthorizeEventAdmin(evt);
+            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
 
             model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)
                 .Select(x => ModelMapper.ToProductModel(x))
@@ -109,9 +111,9 @@ namespace Bidster.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
             {
-                return Unauthorized();
+                return Forbid();
             }
 
             var eventProducts = await _dbContext.Products
@@ -169,9 +171,9 @@ namespace Bidster.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
             {
-                return Unauthorized();
+                return Forbid();
             }
 
             var winningBids = await (from bid in _dbContext.Bids
@@ -221,8 +223,14 @@ namespace Bidster.Controllers
 
         [Authorize]
         [HttpGet("new")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            {
+                return Forbid();
+            }
+
             var model = new EditEventViewModel();
             model.StartOn = DateTime.Now.Date;
             model.EndOn = DateTime.Now.Date.AddDays(1);
@@ -241,6 +249,10 @@ namespace Bidster.Controllers
             }
 
             var tenant = await _tenantContext.GetCurrentTenantAsync();
+            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            {
+                return Forbid();
+            }
 
             try
             {

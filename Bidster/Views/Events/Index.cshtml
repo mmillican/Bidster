@@ -4,9 +4,12 @@
     ViewBag.Title = "Events";
 }
 
-<p>
-    <a asp-action="Create" class="btn btn-success">New Event</a>
-</p>
+@if (Model.CanCreateEvent)
+{
+    <p>
+        <a asp-action="Create" class="btn btn-success">New Event</a>
+    </p>
+}
 
 <table class="table table-sm table-striped">
     <thead>
