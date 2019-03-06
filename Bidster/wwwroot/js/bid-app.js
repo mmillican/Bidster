@@ -9,6 +9,8 @@
         },
         productId: 0,
         currentBidAmount: 0,
+        buyItNowPrice: null,
+        purchasedDate: null,
         nextBidAmount: null,
         bids: [],
         nextBidMinAmount: null
@@ -19,10 +21,13 @@
         this.event.isUserAdmin = window.eventData.isUserAdmin;
         this.event.isBiddingOpen = window.eventData.isBiddingOpen;
 
+
         this.productId = window.bids.productId;
         this.currentBidAmount = window.bids.currentBidAmount;
         //this.newBidAmount = window.bids.newBidAmount;
         this.nextBidMinAmount = window.bids.nextBidMinAmount;
+        this.buyItNowPrice = window.bids.buyItNowPrice;
+        this.purchasedDate = window.bids.purchasedDate;
 
         this.refreshBids();
     },
@@ -58,6 +63,28 @@
             var data = {
                 productId: this.productId,
                 amount: this.nextBidAmount
+            };
+            xhr.send(JSON.stringify(data));
+        },
+        buyNow: function () {
+            if (!confirm('Are you sure you want to purchase this product?')) {
+                return;
+            }
+
+            var self = this;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/bids/buy-now');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onload = function () {
+                if (xhr.readyState === xhr.DONE && xhr.status === 201) {
+                    self.refreshBids();
+                    self.purchasedDate = new Date();
+                }
+            };
+
+            var data = {
+                productId: this.productId
             };
             xhr.send(JSON.stringify(data));
         }

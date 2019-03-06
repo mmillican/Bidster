@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
@@ -23,6 +24,12 @@ namespace Bidster.Models.Products
         public decimal StartingPrice { get; set; }
         [Display(Name = "Minimum bid amount")]
         public decimal MinimumBidAmount { get; set; }
+
+        [Display(Name = "Buy it now price")]
+        public decimal? BuyItNowPrice { get; set; }
+        public DateTime? PurchasedDate { get; set; }
+        public int? PurchasedUserId { get; set; }
+        public bool IsPurchased => PurchasedDate.HasValue;
 
         public bool HasBids { get; set; }
 

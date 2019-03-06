@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Bidster.Entities.Events;
@@ -29,6 +30,12 @@ namespace Bidster.Entities.Products
 
         public decimal CurrentBidAmount { get; set; }
         public int? CurrentHighBidUserId { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal? BuyItNowPrice { get; set; }
+        public DateTime? PurchasedDate { get; set; }
+        public int? PurchasedUserId { get; set; }
+        public bool IsPurchased => PurchasedDate.HasValue;
 
         public int BidCount { get; set; }
         public bool HasBids => BidCount > 0;

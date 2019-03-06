@@ -30,31 +30,45 @@
     <div v-if="event.isBiddingOpen">
         <div class="row">
             <div class="col-md-4">
-                <h3>
-                    {{ currentBidAmount | currency }}
-                    <small>Current Bid</small>
-                </h3>
+                <div class="bid-wrapper" v-if="purchasedDate === ''">
+                    <h3>
+                        {{ currentBidAmount | currency }}
+                        <small>Current Bid</small>
+                    </h3>
 
-                <form v-on:submit.prevent="submitBid()" class="form-inline mb-4">
-                    @*<input type="hidden" name="ProductId" value="@Model.Product.Id" />*@
+                    <form v-on:submit.prevent="submitBid()" class="form-inline mb-4">
+                        @*<input type="hidden" name="ProductId" value="@Model.Product.Id" />*@
 
-                    <div class="form-group">
-                        <label for="bid-amount" class="sr-only">Bid Amount</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">$</span>
+                        <div class="form-group">
+                            <label for="bid-amount" class="sr-only">Bid Amount</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">$</span>
+                                </div>
+                                <input type="text" id="bid-amount" name="Amount" class="form-control" v-model="nextBidAmount" :placeholder="nextBidMinAmount" />
+                                <span class="input-group-append">
+                                    <button type="submit" class="btn btn-primary">Place Bid</button>
+                                </span>
                             </div>
-                            <input type="text" id="bid-amount" name="Amount" class="form-control" v-model="nextBidAmount" :placeholder="nextBidMinAmount" />
-                            <span class="input-group-append">
-                                <button type="submit" class="btn btn-primary">Place Bid</button>
-                            </span>
                         </div>
-                    </div>
 
-                    <br />
+                        <br />
 
-                    <span class="text-muted">Bid must be <strong>{{ nextBidMinAmount | currency }}</strong> or greater.</span>
-                </form>
+                        <span class="text-muted">Bid must be <strong>{{ nextBidMinAmount | currency }}</strong> or greater.</span>
+                    </form>
+                </div>
+                <div class="buy-it-now" v-if="buyItNowPrice > 0 && purchasedDate === ''">
+                    <h3>
+                        {{ buyItNowPrice | currency }}
+                        <small>Buy it now!</small>
+                    </h3>
+                    <form v-on:submit.prevent="buyNow()" class="form-inline mb-4">
+                        <button type="submit" class="btn btn-primary">Buy Now!</button>
+                    </form>
+                </div>
+                <div class="alert alert-info purchased" v-if="purchasedDate">
+                    This item has been purchased and cannot be bid on.
+                </div>
             </div>
             <div class="col-md-8">
                 <h3>Bid History <small>{{ bids.length }} total bids</small></h3>
@@ -105,12 +119,14 @@
             id: @Model.Event.Id,
             hideBidderNames: @Model.Event.HideBidderNames.ToString().ToLower(),
             isUserAdmin: @Model.CanUserEdit.ToString().ToLower(),
-            isBiddingOpen: @Model.Event.IsBiddingOpen.ToString().ToLower()
+            isBiddingOpen: @Model.Event.IsBiddingOpen.ToString().ToLower(),
         };
         window.bids = {
             productId: @Model.Product.Id,
             currentBidAmount: @Model.Product.CurrentBidAmount,
-            nextBidMinAmount: @Model.Product.NextMinBidAmount
+            nextBidMinAmount: @Model.Product.NextMinBidAmount,
+            buyItNowPrice: @Model.Product.BuyItNowPrice.GetValueOrDefault(),
+            purchasedDate: '@Model.Product.PurchasedDate'
         };
     </script>
     <script src="~/js/bid-app.js" asp-append-version="true"></script>

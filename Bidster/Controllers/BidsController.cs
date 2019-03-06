@@ -117,6 +117,68 @@ namespace Bidster.Controllers
             }
         }
 
+        public class BuyNowModel
+        {
+            public int ProductId { get; set; }
+        }
+
+        [HttpPost("buy-now")]
+        public async Task<IActionResult> BuyNow([FromBody] BuyNowModel model)
+        {
+            var tenant = await _tenantContext.GetCurrentTenantAsync();
+            var product = await _dbContext.Products.FindAsync(model.ProductId);
+            if (product == null || product.TenantId != tenant.Id)
+            {
+                _logger.LogInformation("Product {productId} not found", model.ProductId);
+                return NotFound();
+            }
+
+            if (!product.BuyItNowPrice.HasValue)
+            {
+                return BadRequest("Buy it now not enabled for specified product.");
+            }
+
+            var evt = await _dbContext.Events.FindAsync(product.EventId);
+            if (evt == null)
+            {
+                _logger.LogInformation("Event {eventId} not found", product.EventId);
+                return NotFound();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (product.IsPurchased)
+            {
+                return BadRequest("Product has already been purchased.");
+            }
+
+            try
+            {
+                var placeBidRequest = new PlaceBidRequest
+                {
+                    Event = evt,
+                    Product = product,
+                    User = user,
+                    Amount = product.BuyItNowPrice.Value
+                };
+                var bidResult = await _bidService.PlaceBidAsync(placeBidRequest);
+
+                // TODO: probably would be wise to move this into the BidService
+                product.PurchasedDate = DateTime.UtcNow;
+                product.PurchasedUserId = user.Id;
+
+                _dbContext.Products.Update(product);
+                await _dbContext.SaveChangesAsync();
+
+                return Created("", null);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error procesing buy it now for product ID {id}", model.ProductId);
+                return StatusCode(500);
+            }
+        }
+
         private ActionResult RedirectToProduct(string evtSlug, string slug) =>
             RedirectToAction("Details", "Products", new { evtSlug = evtSlug, slug = slug });        
     }

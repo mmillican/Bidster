@@ -29,6 +29,13 @@
     <label asp-for="MinimumBidAmount"></label>
     <input type="text" asp-for="MinimumBidAmount" class="form-control" />
 </div>
+<div class="form-group">
+    <label asp-for="BuyItNowPrice"></label>
+    <input type="text" asp-for="BuyItNowPrice" class="form-control" />
+    <span class="text-muted">
+        If you want to enable a "buy it now" price, enter it here. Once purchased, bidding will be disabled.
+    </span>
+</div>
 
 <div class="form-group mb-2 clearfix">
     <div class="custom-file">

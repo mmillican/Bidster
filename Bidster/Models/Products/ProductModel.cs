@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Bidster.Models.Products
@@ -19,6 +20,11 @@ namespace Bidster.Models.Products
 
         public decimal CurrentBidAmount { get; set; }
         public int? CurrentHighBidUserId { get; set; }
+
+        public decimal? BuyItNowPrice { get; set; }
+        public DateTime? PurchasedDate { get; set; }
+        public int? PurchasedUserId { get; set; }
+        public bool IsPurchased => PurchasedDate.HasValue;
 
         public int BidCount { get; set; }
         public bool HasBids => BidCount > 0;

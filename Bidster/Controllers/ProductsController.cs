@@ -153,7 +153,8 @@ namespace Bidster.Controllers
                     Description = model.Description,
                     StartingPrice = model.StartingPrice,
                     MinimumBidAmount = model.MinimumBidAmount,
-                    CurrentBidAmount = model.StartingPrice
+                    CurrentBidAmount = model.StartingPrice,
+                    BuyItNowPrice = model.BuyItNowPrice
                 };
 
                 product.Slug = await GenerateSlugAsync(evt.Id, product.Name);
@@ -241,6 +242,7 @@ namespace Bidster.Controllers
                 Description = product.Description,
                 StartingPrice = product.StartingPrice,
                 MinimumBidAmount = product.MinimumBidAmount,
+                BuyItNowPrice = product.BuyItNowPrice,
                 HasBids = product.HasBids,
 
                 ImageFilename  = product.ImageFilename,
@@ -297,10 +299,12 @@ namespace Bidster.Controllers
 
             try
             {
+                product.TenantId = tenant.Id;
                 product.Name = model.Name;
                 product.Description = model.Description;
                 product.StartingPrice = model.StartingPrice;
                 product.MinimumBidAmount = model.MinimumBidAmount;
+                product.BuyItNowPrice = model.BuyItNowPrice;
 
                 if (model.ImageFile != null)
                 {
