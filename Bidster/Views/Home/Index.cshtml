@@ -9,12 +9,12 @@
 }
 
 @section Jumbotron
-    {
+{
     <div class="jumbotron">
         <div class="container">
-            <h1>@Model.Settings.Branding.Title</h1>
+            <h1>@Model.Settings?.Branding?.Title</h1>
 
-            <h3>@Model.Settings.Branding.SubTitle</h3>
+            <h3>@Model.Settings?.Branding?.SubTitle</h3>
         </div>
     </div>
 }
