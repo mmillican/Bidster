@@ -147,7 +147,7 @@ namespace Bidster.Controllers
             {
                 var product = new Product
                 {
-                    Tenant = tenant,
+                    TenantId = tenant.Id,
                     Event = evt,
                     Name = model.Name,
                     Description = model.Description,
