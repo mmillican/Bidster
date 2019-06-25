@@ -1,5 +1,4 @@
-﻿using Bidster.Entities.Tenants;
-using Bidster.Models.Events;
+﻿using Bidster.Models.Events;
 using System;
 using System.Collections.Generic;
 
@@ -10,8 +9,6 @@ namespace Bidster.Models.Home
         public List<EventModel> Events { get; set; }
 
         public List<BidSummaryModel> UserBids { get; set; } = new List<BidSummaryModel>();
-
-        public TenantSettings Settings { get; set; }
     }
 
     public class BidSummaryModel

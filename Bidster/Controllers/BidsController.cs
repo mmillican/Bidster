@@ -1,20 +1,16 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Bidster.Data;
-using Bidster.Entities.Bids;
 using Bidster.Entities.Users;
-using Bidster.Hubs;
 using Bidster.Models;
 using Bidster.Models.Bids;
 using Bidster.Services.Notifications;
-using Bidster.Services.Tenants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bidster.Controllers
 {
@@ -26,28 +22,24 @@ namespace Bidster.Controllers
         private readonly BidsterDbContext _dbContext;
         private readonly UserManager<User> _userManager;
         private readonly IBidService _bidService;
-        private readonly ITenantContext _tenantContext;
         private readonly ILogger<BidsController> _logger;
 
         public BidsController(BidsterDbContext dbContext,
             UserManager<User> userManager,
             IBidService bidService,
-            ITenantContext tenantContext,
             ILogger<BidsController> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _bidService = bidService;
-            _tenantContext = tenantContext;
             _logger = logger;
         }
 
         [HttpGet("")]
         public async Task<IActionResult> GetItemBids(int productId)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
             var product = await _dbContext.Products.FindAsync(productId);
-            if (product == null || product.TenantId != tenant.Id)
+            if (product == null)
             {
                 return NotFound("Product not found");
             }
@@ -69,9 +61,8 @@ namespace Bidster.Controllers
             // - Make sure user can bid
             // - Make sure last bid wasn't current user
 
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
             var product = await _dbContext.Products.FindAsync(model.ProductId);
-            if (product == null || product.TenantId != tenant.Id)
+            if (product == null)
             {
                 _logger.LogInformation("Product {productId} not found", model.ProductId);
                 return NotFound();
@@ -125,9 +116,8 @@ namespace Bidster.Controllers
         [HttpPost("buy-now")]
         public async Task<IActionResult> BuyNow([FromBody] BuyNowModel model)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
             var product = await _dbContext.Products.FindAsync(model.ProductId);
-            if (product == null || product.TenantId != tenant.Id)
+            if (product == null)
             {
                 _logger.LogInformation("Product {productId} not found", model.ProductId);
                 return NotFound();

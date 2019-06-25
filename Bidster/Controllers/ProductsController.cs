@@ -4,7 +4,6 @@ using Bidster.Entities.Users;
 using Bidster.Models;
 using Bidster.Models.Products;
 using Bidster.Services.FileStorage;
-using Bidster.Services.Tenants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,21 +20,18 @@ namespace Bidster.Controllers
     public class ProductsController : Controller
     {
         private readonly BidsterDbContext _dbContext;
-        private readonly ITenantContext _tenantContext;
         private readonly UserManager<User> _userManager;
         private readonly IFileService _fileService;
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(BidsterDbContext dbContext,
-            ITenantContext tenantContext,
             UserManager<User> userManager,
             IFileService fileService,
             IAuthorizationService authorizationService,
             ILogger<ProductsController> logger)
         {
             _dbContext = dbContext;
-            _tenantContext = tenantContext;
             _userManager = userManager;
             _fileService = fileService;
             _authorizationService = authorizationService;
@@ -45,16 +41,14 @@ namespace Bidster.Controllers
         [HttpGet("{slug}")]
         public async Task<IActionResult> Details(string evtSlug, string slug)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
             if (evt == null)
             {
                 _logger.LogInformation("Event slug '{evtSlug}' not found", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            var product = await _dbContext.Products.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.EventId == evt.Id && x.Slug == slug);
+            var product = await _dbContext.Products.SingleOrDefaultAsync(x => x.EventId == evt.Id && x.Slug == slug);
             if (product == null)
             {
                 _logger.LogInformation("Product slug '{slug}' not found or does not belong to event '{evtSlug}'", slug, evtSlug);
@@ -72,7 +66,7 @@ namespace Bidster.Controllers
                 model.Product.ImageUrl = _fileService.ResolveFileUrl(string.Format(Constants.ImagePathFormat, evt.Slug, product.ImageFilename));
             }
 
-            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
+            //model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
 
 
             return View(model);
@@ -82,21 +76,19 @@ namespace Bidster.Controllers
         [HttpGet("new")]
         public async Task<IActionResult> Create(string evtSlug)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            {
-                return Forbid();
-            }
+            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            //{
+            //    return Forbid();
+            //}
 
             var model = new EditProductViewModel
             {
@@ -117,9 +109,7 @@ namespace Bidster.Controllers
         [HttpPost("new")]
         public async Task<IActionResult> Create(string evtSlug, EditProductViewModel model)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
             if (!ModelState.IsValid)
@@ -127,16 +117,16 @@ namespace Bidster.Controllers
                 return View(model);
             }
 
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            {
-                return Forbid();
-            }
+            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            //{
+            //    return Forbid();
+            //}
 
             // Reset event props in case something fails...
             model.EventId = evt.Id;
@@ -147,7 +137,6 @@ namespace Bidster.Controllers
             {
                 var product = new Product
                 {
-                    TenantId = tenant.Id,
                     Event = evt,
                     Name = model.Name,
                     Description = model.Description,
@@ -207,21 +196,19 @@ namespace Bidster.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(string evtSlug, int id)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            {
-                return Forbid();
-            }
+            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            //{
+            //    return Forbid();
+            //}
 
             var product = await _dbContext.Products.FindAsync(id);
             if (product == null || product.EventId != evt.Id)
@@ -268,21 +255,19 @@ namespace Bidster.Controllers
         [HttpPost("edit/{id}")]
         public async Task<IActionResult> Edit(string evtSlug, int id, EditProductViewModel model)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
-            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.TenantId == tenant.Id && x.Slug == evtSlug);
+            var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == evtSlug);
             var user = await _userManager.GetUserAsync(User);
 
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event with slug '{slug}'", evtSlug);
                 return RedirectToAction("Index", "Events");
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            {
-                return Forbid();
-            }
+            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            //{
+            //    return Forbid();
+            //}
 
             // Reset event props in case something fails...
             model.Id = id;
@@ -299,7 +284,6 @@ namespace Bidster.Controllers
 
             try
             {
-                product.TenantId = tenant.Id;
                 product.Name = model.Name;
                 product.Description = model.Description;
                 product.StartingPrice = model.StartingPrice;

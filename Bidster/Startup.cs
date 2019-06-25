@@ -1,33 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Amazon.S3;
+using Amazon.SimpleEmail;
+using Bidster.Auth;
+using Bidster.Configuration;
+using Bidster.Data;
+using Bidster.Entities.Users;
+using Bidster.Hubs;
+using Bidster.Services;
+using Bidster.Services.FileStorage;
+using Bidster.Services.Mvc;
+using Bidster.Services.Notifications;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
-using Bidster.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Bidster.Entities.Users;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Bidster.Services;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Bidster.Configuration;
-using Amazon.S3;
-using Bidster.Services.FileStorage;
-using Bidster.Auth;
-using Microsoft.AspNetCore.Authorization;
-using Bidster.Hubs;
-using Bidster.Services.Notifications;
-using Bidster.Services.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
-using Amazon.SimpleEmail;
-using Bidster.Services.Tenants;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Bidster
@@ -78,11 +72,7 @@ namespace Bidster
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(Policies.Admin, policy => policy.RequireRole(Roles.Admin));
-                //options.AddPolicy("EventAdmin", policy => policy.AddRequirements(new EventAdminRequirement()));
-                options.AddPolicy(Policies.TenantAdmin, policy => policy.AddRequirements(new TenantAdminRequirement()));
             });
-            services.AddScoped<IAuthorizationHandler, TenantAdminHandler>();
-            //services.AddSingleton<IAuthorizationHandler, EventAdminHandler>();
 
             services.AddSwaggerGen(opts =>
             {
@@ -96,9 +86,6 @@ namespace Bidster
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<FileStorageConfig>(Configuration.GetSection("FileStorage"));
 
-            services.AddScoped<ITenantService, TenantService>();
-            services.AddScoped<ITenantContext, TenantContext>();
-            services.AddScoped<ITenantUserService, TenantUserService>();
             services.AddSingleton<IEmailSender, AmazonSesEmailSender>();
             services.AddTransient<IViewRenderer, ViewRenderer>();
             services.AddScoped<IBidService, BidService>();

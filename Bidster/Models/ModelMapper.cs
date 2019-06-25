@@ -1,15 +1,13 @@
-using System;
 using Bidster.Entities.Bids;
 using Bidster.Entities.Events;
 using Bidster.Entities.Products;
-using Bidster.Entities.Tenants;
 using Bidster.Entities.Users;
 using Bidster.Models.Bids;
 using Bidster.Models.Events;
 using Bidster.Models.EventUsers;
 using Bidster.Models.Products;
-using Bidster.Models.Tenants;
 using Bidster.Models.Users;
+using System;
 
 namespace Bidster.Models
 {
@@ -27,24 +25,6 @@ namespace Bidster.Models
             City = user.City,
             State = user.State,
             PostalCode = user.PostalCode
-        };
-
-        public static TenantUserModel ToModel(this TenantUser tenantUser) => new TenantUserModel
-        {
-            Id = tenantUser.Id,
-            TenantId = tenantUser.TenantId,
-            UserId = tenantUser.UserId,
-            User = tenantUser.User.ToUserModel(),
-            AddedOn = tenantUser.AddedOn,
-            IsAdmin = tenantUser.IsAdmin
-        };
-
-        public static TenantModel ToTenantModel(this Tenant tenant) => new TenantModel
-        {
-            Id = tenant.Id,
-            Name = tenant.Name,
-            HostNames = tenant.HostNames,
-            IsDisabled = tenant.IsDisabled
         };
 
         public static EventModel ToEventModel(this Event evt) => new EventModel

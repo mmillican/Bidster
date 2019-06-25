@@ -1,8 +1,4 @@
-﻿@inject Bidster.Services.Tenants.ITenantContext TenantContext
-@inject Microsoft.AspNetCore.Authorization.IAuthorizationService AuthorizationService
-@{ 
-    var tenant = await TenantContext.GetCurrentTenantAsync();
-}
+﻿@inject Microsoft.AspNetCore.Authorization.IAuthorizationService AuthorizationService
 
 <!DOCTYPE html>
 <html>
@@ -28,7 +24,7 @@
 <body>
     <header class="site-header">
         <div class="container">
-            <h1><a asp-area="" asp-controller="Home" asp-action="Index" class="brand text-reset">Bidster - @tenant.Name</a></h1>
+            <h1><a asp-area="" asp-controller="Home" asp-action="Index" class="brand text-reset">Bidster</a></h1>
         </div>
 
     </header>
@@ -42,10 +38,6 @@
                 <ul class="navbar-nav  mr-auto mt-2 mt-lg-0">
                     <li class="nav-item"><a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link">Home</a></li>
                     <li class="nav-item"><a asp-area="" asp-controller="Events" asp-action="Index" class="nav-link">Events</a></li>
-                    @if ((await AuthorizationService.AuthorizeAsync(User, null, Policies.Admin)).Succeeded)
-                    {
-                        <li class="nav-item"><a asp-area="" asp-controller="Tenants" asp-action="Index" class="nav-link">Tenants</a></li>
-                    }
                 </ul>
                 <partial name="_LoginPartial" />
             </div>

@@ -1,19 +1,17 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Bidster.Data;
 using Bidster.Entities.Events;
-using Bidster.Entities.Tenants;
 using Bidster.Entities.Users;
 using Bidster.Models;
 using Bidster.Models.Events;
 using Bidster.Services.FileStorage;
-using Bidster.Services.Tenants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bidster.Controllers
 {
@@ -22,21 +20,18 @@ namespace Bidster.Controllers
     public class EventsController : Controller
     {
         private readonly BidsterDbContext _dbContext;
-        private readonly ITenantContext _tenantContext;
         private readonly UserManager<User> _userManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly IFileService _fileService;
         private readonly ILogger<EventsController> _logger;
 
         public EventsController(BidsterDbContext dbContext,
-            ITenantContext tenantContext,
             UserManager<User> userManager,
             IAuthorizationService authorizationService,
             IFileService fileService,
             ILogger<EventsController> logger)
         {
             _dbContext = dbContext;
-            _tenantContext = tenantContext;
             _userManager = userManager;
             _authorizationService = authorizationService;
             _fileService = fileService;
@@ -46,10 +41,7 @@ namespace Bidster.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
             var events = await _dbContext.Events
-                .Where(x => x.TenantId == tenant.Id)
                 .Select(x => ModelMapper.ToEventModel(x))
                 .ToListAsync();
 
@@ -58,7 +50,7 @@ namespace Bidster.Controllers
                 Events = events
             };
 
-            model.CanCreateEvent = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
+            model.CanCreateEvent = (await _authorizationService.AuthorizeAsync(User, null, Policies.Admin)).Succeeded;
 
             return View(model);
         }
@@ -66,22 +58,18 @@ namespace Bidster.Controllers
         [HttpGet("{slug}")]
         public async Task<IActionResult> Details(string slug)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
             var evt = await _dbContext.Events.Include(x => x.Users).SingleOrDefaultAsync(x => x.Slug == slug);
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
                 return RedirectToAction(nameof(Index));
             }
 
-            var user = await _userManager.GetUserAsync(User);
-
             var model = new EventDetailsViewModel
             {
                 Event = ModelMapper.ToEventModel(evt)
             };
-            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
+            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded;
 
             model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)
                 .Select(x => ModelMapper.ToProductModel(x))
@@ -102,16 +90,14 @@ namespace Bidster.Controllers
         [HttpGet("{slug}/all-bids")]
         public async Task<IActionResult> AllBids(string slug)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
             var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == slug);
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            if (!(await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded)
             {
                 return Forbid();
             }
@@ -162,16 +148,14 @@ namespace Bidster.Controllers
         [HttpGet("{slug}/winning-bids")]
         public async Task<IActionResult> WinningBids(string slug)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
             var evt = await _dbContext.Events.SingleOrDefaultAsync(x => x.Slug == slug);
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Event not found for slug '{slug}'", slug);
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            if (!(await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded)
             {
                 return Forbid();
             }
@@ -225,8 +209,7 @@ namespace Bidster.Controllers
         [HttpGet("new")]
         public async Task<IActionResult> Create()
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            if (!(await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded)
             {
                 return Forbid();
             }
@@ -248,8 +231,7 @@ namespace Bidster.Controllers
                 return View(model);
             }
 
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-            if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
+            if (!(await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded)
             {
                 return Forbid();
             }
@@ -260,7 +242,6 @@ namespace Bidster.Controllers
 
                 var evt = new Event
                 {
-                    Tenant = tenant,
                     Name = model.Name,
                     Description = model.Description,
                     StartOn = model.StartOn,
@@ -272,7 +253,7 @@ namespace Bidster.Controllers
                     CreatedOn = DateTime.UtcNow
                 };
 
-                evt.Slug = await GenerateSlug(tenant, evt.Name);
+                evt.Slug = await GenerateSlug(evt.Name);
 
                 _dbContext.Events.Add(evt);
                 await _dbContext.SaveChangesAsync();
@@ -290,11 +271,8 @@ namespace Bidster.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
             var evt = await _dbContext.Events.FindAsync(id);
-            var user = await _userManager.GetUserAsync(User);
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event ID '{id}'", id);
                 return RedirectToAction(nameof(Index));
@@ -329,17 +307,14 @@ namespace Bidster.Controllers
                 return View(model);
             }
 
-            var tenant = await _tenantContext.GetCurrentTenantAsync();
-
             var evt = await _dbContext.Events.FindAsync(id);
-            var user = await _userManager.GetUserAsync(User);
-            if (evt == null || evt.TenantId != tenant.Id)
+            if (evt == null)
             {
                 _logger.LogInformation("Could not find event ID '{id}'", id);
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
             {
                 return Unauthorized();
             }
@@ -366,18 +341,18 @@ namespace Bidster.Controllers
             }
         }
 
-        private async Task<string> GenerateSlug(Tenant tenant, string name)
+        private async Task<string> GenerateSlug(string name)
         {
             var slug = name.Clean();
 
-            if (!await _dbContext.Events.AnyAsync(x => x.TenantId == tenant.Id && x.Slug == slug))
+            if (!await _dbContext.Events.AnyAsync(x => x.Slug == slug))
             {
                 return slug;
             }
         
             var appendIdx = 1;
             var modSlug = $"{slug}-{appendIdx})";
-            while (await _dbContext.Events.AnyAsync(x => x.TenantId == tenant.Id && x.Slug == modSlug))
+            while (await _dbContext.Events.AnyAsync(x => x.Slug == modSlug))
             {
                 appendIdx++;
                 modSlug = $"{slug}-{appendIdx})";
