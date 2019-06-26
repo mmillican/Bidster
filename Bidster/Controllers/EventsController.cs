@@ -69,7 +69,7 @@ namespace Bidster.Controllers
             {
                 Event = ModelMapper.ToEventModel(evt)
             };
-            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded;
+            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded;
 
             model.Products = await _dbContext.Products.Where(x => x.EventId == evt.Id)
                 .Select(x => ModelMapper.ToProductModel(x))
@@ -97,7 +97,7 @@ namespace Bidster.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded)
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
             {
                 return Forbid();
             }
@@ -155,7 +155,7 @@ namespace Bidster.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!(await _authorizationService.AuthorizeAsync(User, Policies.Admin)).Succeeded)
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
             {
                 return Forbid();
             }
@@ -278,7 +278,7 @@ namespace Bidster.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (!await AuthorizeEventAdmin(evt))
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
             {
                 return Unauthorized();
             }
@@ -359,29 +359,6 @@ namespace Bidster.Controllers
             }
 
             return modSlug;
-        }
-
-        // TODO: Would be nice to have this be an actual auth policy, but need to figure out adding claims first
-        private async Task<bool> AuthorizeEventAdmin(Event evt)
-        {
-            // TODO: Needs to be tenant aware 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return false;
-            }
-
-            if (user.Id == evt.OwnerId)
-            {
-                return true;
-            }
-
-            var isEventAdmin = await _dbContext.EventUsers
-                .AnyAsync(x => x.EventId == evt.Id
-                    && x.UserId == user.Id
-                    && x.IsAdmin);
-
-            return isEventAdmin;
         }
     }
 }

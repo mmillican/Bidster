@@ -72,7 +72,9 @@ namespace Bidster
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(Policies.Admin, policy => policy.RequireRole(Roles.Admin));
+                options.AddPolicy(Policies.EventAdmin, policy => policy.AddRequirements(new EventAdminRequirement()));
             });
+            services.AddScoped<IAuthorizationHandler, EventAdminHandler>();
 
             services.AddSwaggerGen(opts =>
             {

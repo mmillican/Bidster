@@ -66,7 +66,7 @@ namespace Bidster.Controllers
                 model.Product.ImageUrl = _fileService.ResolveFileUrl(string.Format(Constants.ImagePathFormat, evt.Slug, product.ImageFilename));
             }
 
-            //model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded;
+            model.CanUserEdit = (await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded;
 
 
             return View(model);
@@ -85,10 +85,10 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            //{
-            //    return Forbid();
-            //}
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
+            {
+                return Forbid();
+            }
 
             var model = new EditProductViewModel
             {
@@ -123,10 +123,10 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            //{
-            //    return Forbid();
-            //}
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
+            {
+                return Forbid();
+            }
 
             // Reset event props in case something fails...
             model.EventId = evt.Id;
@@ -205,10 +205,10 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            //{
-            //    return Forbid();
-            //}
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
+            {
+                return Forbid();
+            }
 
             var product = await _dbContext.Products.FindAsync(id);
             if (product == null || product.EventId != evt.Id)
@@ -264,10 +264,10 @@ namespace Bidster.Controllers
                 return RedirectToAction("Index", "Events");
             }
 
-            //if (!(await _authorizationService.AuthorizeAsync(User, tenant, Policies.TenantAdmin)).Succeeded)
-            //{
-            //    return Forbid();
-            //}
+            if (!(await _authorizationService.AuthorizeAsync(User, evt, Policies.EventAdmin)).Succeeded)
+            {
+                return Forbid();
+            }
 
             // Reset event props in case something fails...
             model.Id = id;

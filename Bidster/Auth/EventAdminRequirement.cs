@@ -16,27 +16,39 @@ namespace Bidster.Auth
     public class EventAdminHandler : AuthorizationHandler<EventAdminRequirement, Event>
     {
         private readonly UserManager<User> _userManager;
+        private readonly BidsterDbContext _dbContext;
 
-        public EventAdminHandler(UserManager<User> userManager)
+        public EventAdminHandler(UserManager<User> userManager,
+            BidsterDbContext dbContext)
         {
             _userManager = userManager;
+            _dbContext = dbContext;
         }
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, EventAdminRequirement requirement, Event resource)
         {
-            //context.User.Claims.fi
             var user = await _userManager.GetUserAsync(context.User);
+            if (user == null)
+            {
+                context.Fail();
+                return;
+            }
+
             if (resource.OwnerId == user.Id)
             {
                 context.Succeed(requirement);
+                return;
             }
 
-            var eventAdminIds = resource.Users
+            var eventAdminIds = await _dbContext.EventUsers
                 .Where(x => x.EventId == resource.Id && x.IsAdmin)
-                .Select(x => x.UserId);
+                .Select(x => x.UserId)
+                .ToListAsync();
+
             if (eventAdminIds.Contains(user.Id))
             {
                 context.Succeed(requirement);
+                return;
             }
 
             context.Fail();
